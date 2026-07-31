@@ -4,15 +4,7 @@
 > 既是一套「讲透概念」的备考知识库，也是一个能当真实面试官、逐题打分、出记分卡的 AI Agent。  
 > 覆盖：Linux · 网络 · 容器/K8s · CI/CD/IaC · 监控可观测 · 故障/SRE · 中间件 · GPU/AI 运维 · 云/安全 · 行为与架构。
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-
-![Questions](https://img.shields.io/badge/questions-200%2B-blue.svg)
-
-![Chinese](https://img.shields.io/badge/lang-中文-red.svg)
-
-![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)
-
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Questions](https://img.shields.io/badge/questions-200%2B-blue.svg)](#目录) [![Chinese](https://img.shields.io/badge/lang-中文-red.svg)](#) [![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)](#如何导入与使用) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
 
