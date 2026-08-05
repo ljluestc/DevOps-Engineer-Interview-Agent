@@ -9,6 +9,7 @@
 |---|---|---|---|
 | `cuiliang-ops-interview-2024.md` | [崔亮博客：高级运维工程师面试题汇总](https://www.cuiliangblog.cn/detail/article/89) | 231 题 | 2024 年 7–8 月面试 20+ 家公司 50+ 场，☆ 标记高频题 |
 | `cuiliang-mid-ops-interview-2020.md` | [崔亮博客：中级运维工程师面试题汇总](https://www.cuiliangblog.cn/detail/article/2) | 89 题 | 2020 年发布的中级运维面试题（含 MySQL/NoSQL/Docker/K8s/Prometheus/ELK/运维开发）|
+| `cuiliang-entry-ops-interview-2020.md` | [崔亮博客：linux运维工程师面试题总结](https://www.cuiliangblog.cn/detail/article/1) | 88 题 | 2020 年 11 月发布（IBM/新浪/完美世界等），与中级篇高度重合，仅 2–3 题独有，存档备查 |
 
 ## 版权与使用口径（重要）
 
