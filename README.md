@@ -4,7 +4,7 @@
 > 既是一套「讲透概念」的备考知识库，也是一个能当真实面试官、逐题打分、出记分卡的 AI Agent。  
 > 覆盖：Linux · 网络 · 容器/K8s · CI/CD/IaC · 监控可观测 · 故障/SRE · 中间件 · GPU/AI 运维 · 云/安全 · 行为与架构。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Questions](https://img.shields.io/badge/questions-200%2B-blue.svg)](#目录) [![Chinese](https://img.shields.io/badge/lang-中文-red.svg)](#) [![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)](#如何导入与使用) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Questions](https://img.shields.io/badge/questions-430%2B-blue.svg)](#目录) [![Chinese](https://img.shields.io/badge/lang-中文-red.svg)](#) [![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)](#如何导入与使用) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
 
@@ -12,7 +12,7 @@
 
 本项目由两部分组成，且**不绑定任何单一工具**：
 
-1. **知识库（basics/ + modules/）**：200+ 道标准化面试题 + 6 篇基础概念深度篇。
+1. **知识库（basics/ + modules/ + collections/）**：200+ 道自研标准化面试题 + 6 篇基础概念深度篇 + 231 道社区真实真题（标注来源，☆ 为高频题）。
 2. **面试智能体（agent/ + CLAUDE.md + AGENTS.md + workbuddy/）**：把上面的知识库变成一个「运维面试教练」Agent，  
    可在 **Claude Code、Codex、WorkBuddy、ChatGPT 等任意支持系统提示词的 LLM 工具**里运行。
 
@@ -54,12 +54,15 @@ DevOps-Engineer-Interview-Agent/
 │   ├── linux / network / kubernetes / cicd-iac
 │   ├── observability / sre-reliability / middleware
 │   └── gpu-ai / cloud-security / behavior
+├── collections/              # 收录的社区真实真题（来源标注见 README）
+│   ├── README.md             # 收录清单 / 版权口径 / 模块映射
+│   └── cuiliang-ops-interview-2024.md   # 崔亮 231 题（☆ 高频标记）
 └── workbuddy/                # WorkBuddy 专家插件（可选，原生体验）
-    └── ops-interview-coach/  # agent 型专家，含内置 80 题浓缩版 + 头像
+    └── ops-interview-coach/  # agent 型专家，含内置浓缩题库 + 头像
 ```
 
 > 知识库是单一事实来源：`agent/UNIVERSAL.md`、`CLAUDE.md`、`AGENTS.md` 都让 Agent 直接读取  
-> `basics/` 与 `modules/`，避免重复维护。`workbuddy/` 下的插件自带一份浓缩版，便于离线使用。
+> `basics/`、`modules/` 与 `collections/`，避免重复维护。`workbuddy/` 下的插件自带一份浓缩版，便于离线使用。
 
 ---
 
