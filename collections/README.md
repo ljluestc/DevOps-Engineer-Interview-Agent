@@ -7,7 +7,8 @@
 
 | 文件 | 来源 | 题量 | 说明 |
 |---|---|---|---|
-| `cuiliang-ops-interview-2024.md` | [崔亮博客：高级运维工程师面试题汇总](https://www.cuiliangblog.cn/detail/article/89) | 231 题 | 作者 2024 年 7–8 月面试 20+ 家公司（字节/京东/百度/网易/蚂蚁/小米等）、50+ 场面试的真题整理，☆ 标记多次出现的高频题 |
+| `cuiliang-ops-interview-2024.md` | [崔亮博客：高级运维工程师面试题汇总](https://www.cuiliangblog.cn/detail/article/89) | 231 题 | 2024 年 7–8 月面试 20+ 家公司 50+ 场，☆ 标记高频题 |
+| `cuiliang-mid-ops-interview-2020.md` | [崔亮博客：中级运维工程师面试题汇总](https://www.cuiliangblog.cn/detail/article/2) | 89 题 | 2020 年发布的中级运维面试题（含 MySQL/NoSQL/Docker/K8s/Prometheus/ELK/运维开发）|
 
 ## 版权与使用口径（重要）
 
@@ -23,9 +24,11 @@
 | 原分类 | 对应 modules 模块 |
 |---|---|
 | Linux | `linux` |
+| MySQL / NoSQL | `middleware` |
+| Docker | `kubernetes`（容器基础）|
 | Kubernetes | `kubernetes` |
 | Prometheus | `observability` |
 | ELK | `middleware`（ES 部分）|
-| DevOps | `cicd-iac` |
+| DevOps / 运维开发 | `cicd-iac` |
 | Python/VUE | 无直接对应（开发向，作为补充题源）|
-| 开放性问题 | `sre-reliability` + `behavior` |
+| 日常工作 / 开放性问题 | `sre-reliability` + `behavior` |

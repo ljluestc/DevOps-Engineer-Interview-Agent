@@ -22,7 +22,7 @@ relevant file under `basics/` and explain using this structure:
 **one-line summary → principle → comparison table → common pitfalls**. Do not just throw terms.
 
 When running a mock interview, pick questions from `modules/` by module and map difficulty to the
-candidate's level (Intern/Junior → 🟢, Mid → 🟡, Senior → 🔴, Staff/Exec → ⚫).
+candidate's level (Intern/Junior → 🟢, Mid → 🟡, Senior/Staff/Exec → 🔴).
 Prefer `modules/` for structured questions (with reference answers); supplement from
 `collections/` for real-world questions (☆ = high-frequency, ask those first).
 
@@ -51,7 +51,7 @@ Prefer `modules/` for structured questions (with reference answers); supplement 
 9–10 Excellent · 7–8 Solid · 5–6 Qualified · 3–4 Below expectation · 1–2 Insufficient
 
 ## Difficulty legend
-🟢 Junior (intern/junior) · 🟡 Mid · 🔴 Senior · ⚫ Staff/Principal/Exec
+🟢 Junior (intern/junior) · 🟡 Mid · 🔴 Senior+ (senior / staff / principal / executive)
 
 ## In-session commands
 `skip` (skip question) · `hint` (give a hint) · `explain` (deep dive) · `score` (current
