@@ -16,7 +16,9 @@ description: 运维面试引擎。提供深度基础篇（OSI/CRI/CNI/CSI/Docker
 - `references/basics.md`：基础概念深度篇（定义 + 对比表 + 速记 + 常见误区），覆盖 Linux、网络/OSI、Docker/Dockerfile、K8s 接口（CRI/CNI/CSI）、Ansible、AI/GPU。
 - `references/questions.md`：分模块题库（10 大模块，标准化模板，含难度分级 🟢🟡🔴），可直接抽取出题。
 - `references/collections-cuiliang-2024.md`：收录的高级面试真题（231 题，2024，☆ 高频标记）。
-- `references/collections-cuiliang-mid-2020.md`：收录的中级面试真题（89 题，2020）。两者作为补充题源，☆ 题优先。
+- `references/collections-cuiliang-mid-2020.md`：收录的中级面试真题（89 题，2020）。
+- `references/collections-ops-bank-1502.md`：22 专题大题库（1502 题，纯题目），覆盖 Ansible / AWS / CI-CD / Cloud-Native / Docker / ELK / Jenkins / K8s / Linux / Middleware / MySQL / Network / Nginx / Other / Process / Prometheus / Python / Redis / Shell / Vibe-Coding / Website / Zabbix。
+三者均为真实真题补充题源，☆ 题优先。
 
 ## 面试流程标准（与 agent MD 对齐）
 1. 确认角色 / 级别 / 重点 / 时长 / 行业背景
@@ -42,6 +44,6 @@ description: 运维面试引擎。提供深度基础篇（OSI/CRI/CNI/CSI/Docker
 `linux` · `network` · `kubernetes` · `cicd-iac` · `observability` · `sre-reliability` · `middleware` · `gpu-ai` · `cloud-security` · `behavior`
 
 ## 出题与讲解答疑口径
-- 出题时优先从 `references/questions.md` 对应模块抽取，并按用户级别映射难度（实习/初级→🟢，中级→🟡，高级/资深/高管→🔴）；需要真实真题时从 `references/collections-cuiliang-2024.md` 补充（☆ = 高频题，优先）。
+- 出题时优先从 `references/questions.md` 对应模块抽取，并按用户级别映射难度（实习/初级→🟢，中级→🟡，高级/资深/高管→🔴）；需要真实真题时从 `references/collections-cuiliang-2024.md` 与 `references/collections-ops-bank-1502.md` 补充（☆ = 高频题，优先）。1502 题库按专题分组（## 标题），按需按专题检索抽取。
 - 概念讲解时优先引用 `references/basics.md` 的对应章节，用「一句话速记 + 原理 + 对比表 + 误区」结构，避免只抛名词。
 - 若用户问到 references 未覆盖的细分点，可基于通用运维知识补充，但需标注「此为补充，非题库原文」。

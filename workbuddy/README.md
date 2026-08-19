@@ -16,6 +16,7 @@ Agent 型（单个 AI 专家）
 ## 内置知识（skills/ops-interview）
 - `references/basics.md`：深度基础篇（Linux / 网络·OSI / Docker·Dockerfile / K8s·CRI·CNI·CSI / Ansible / AI·GPU）
 - `references/questions.md`：分模块题库（10 模块，标准化模板 + 🟢🟡🔴⚫ 难度图例）
+- `references/collections-ops-bank-1502.md`：22 专题大题库 1502 题（Ansible→Zabbix 全覆盖，真实真题）
 
 ## 使用示例
 - 「模拟一场高级运维工程师面试，从 Linux 与系统内核开始」
