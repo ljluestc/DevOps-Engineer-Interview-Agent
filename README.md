@@ -4,7 +4,7 @@
 > 既是一套「讲透概念」的备考知识库，也是一个能当真实面试官、逐题打分、出记分卡的 AI Agent。  
 > 覆盖：Linux · 网络 · 容器/K8s · CI/CD/IaC · 监控可观测 · 故障/SRE · 中间件 · GPU/AI 运维 · 云/安全 · 行为与架构。
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Questions](https://img.shields.io/badge/questions-520%2B-blue.svg)](#目录) [![Chinese](https://img.shields.io/badge/lang-中文-red.svg)](#) [![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)](#如何导入与使用) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Questions](https://img.shields.io/badge/questions-2000%2B-blue.svg)](#目录) [![Chinese](https://img.shields.io/badge/lang-中文-red.svg)](#) [![Tools](https://img.shields.io/badge/works%20on-Claude%20%7C%20Codex%20%7C%20WorkBuddy%20%7C%20any%20LLM-green.svg)](#如何导入与使用) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 ---
 
@@ -12,7 +12,7 @@
 
 本项目由两部分组成，且**不绑定任何单一工具**：
 
-1. **知识库（basics/ + modules/ + collections/）**：200+ 道自研标准化面试题 + 6 篇基础概念深度篇 + 320 道社区真实真题（崔亮高级 231 题 + 中级 89 题，标注来源，☆ 为高频题）。
+1. **知识库（basics/ + modules/ + collections/）**：200+ 道自研标准化面试题 + 6 篇基础概念深度篇 + 1900+ 道社区真实真题（22 专题 1502 题 + 崔亮高级 231 题 + 中级 89 题，标注来源，☆ 为高频题）。
 2. **面试智能体（agent/ + CLAUDE.md + AGENTS.md + workbuddy/）**：把上面的知识库变成一个「运维面试教练」Agent，  
    可在 **Claude Code、Codex、WorkBuddy、ChatGPT 等任意支持系统提示词的 LLM 工具**里运行。
 
@@ -56,6 +56,7 @@ DevOps-Engineer-Interview-Agent/
 │   └── gpu-ai / cloud-security / behavior
 ├── collections/              # 收录的社区真实真题（来源标注见 README）
 │   ├── README.md             # 收录清单 / 版权口径 / 模块映射
+│   ├── ops-question-bank-1502.md       # 22 专题 1502 题大合集
 │   ├── cuiliang-ops-interview-2024.md   # 崔亮 231 题高级（☆ 高频标记）
 │   └── cuiliang-mid-ops-interview-2020.md  # 崔亮 89 题中级
 └── workbuddy/                # WorkBuddy 专家插件（可选，原生体验）
@@ -127,7 +128,7 @@ python3 <workbuddy-expert-manager>/scripts/register_expert.py \
 
 注册后，在 WorkBuddy 专家中心即可直接使用「运维面试教练」，支持内置记分卡与头像。
 
-> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **520+ 题完整版**；  
+> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **2000+ 题完整版**；  
 > `workbuddy/` 插件内置的是 **80 题浓缩版**，便于插件离线自包含。两者口径一致。
 
 ---
@@ -189,7 +190,7 @@ python3 <workbuddy-expert-manager>/scripts/register_expert.py \
 
 - [x] 仓库骨架与标准化规范
 - [x] 基础概念深度篇（6 篇）
-- [x] 十大主题面试题（520+）
+- [x] 十大主题面试题（2000+）
 - [x] 跨工具智能体（CLAUDE.md / AGENTS.md / UNIVERSAL.md / WorkBuddy 插件）
 - [ ] 配套速查表（cheat-sheets/）
 - [ ] 模拟面试脚本（mock-interviews/）

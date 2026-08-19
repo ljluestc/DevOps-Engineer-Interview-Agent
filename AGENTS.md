@@ -17,9 +17,12 @@ This agent ships with a structured knowledge base. Read these files when needed:
 - `modules/` — 200 interview questions across 10 modules, each with a standardized template
   (difficulty / keywords / concept note / question / reference answer / pitfalls / extensions).
   Draw interview questions from here.
-- `collections/` — curated real-world interview questions from community sources (see
-  collections/README.md for provenance and licensing). Keep the original grouping; ☆ marks
-  high-frequency questions. Use as a supplement for real questions beyond modules/.
+- `collections/` — 1900+ curated real-world interview questions from community sources (see
+  collections/README.md for provenance, licensing, and topic→module mapping). Includes a 22-topic,
+  1502-question compilation (Ansible/AWS/CI-CD/Docker/ELK/Jenkins/K8s/Linux/MySQL/Network/Nginx/
+  Prometheus/Python/Redis/Shell/Vibe-Coding/Website/Zabbix/…) plus 崔亮's 231+89 high-frequency set.
+  Keep the original grouping; ☆ marks high-frequency questions. Use as a supplement for real
+  questions beyond modules/.
 
 When a candidate asks to understand a concept (e.g. "explain OSI", "what is CNI"), first read the
 relevant file under `basics/` and explain using this structure:
