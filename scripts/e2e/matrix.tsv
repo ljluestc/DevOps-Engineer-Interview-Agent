@@ -1,0 +1,35 @@
+# name<TAB>model<TAB>prompt — one headless claude -p session per row (run from repo root by run_matrix.sh)
+fund_boe	sonnet	switch system-design back-of-envelope. I'm a junior candidate. Start the interview: ask me the first question.
+fund_consistency	sonnet	switch system-design consistency-models-guide. I'm a mid-level candidate. Start: ask the first question.
+bb_kv	sonnet	switch system-design key-value-store. Senior SRE candidate. Ask me the first question.
+bb_mq	sonnet	switch system-design distributed-message-queue. Senior SRE candidate. Ask me the first question.
+bb_cdn	sonnet	switch system-design cdn. Mid-level candidate. Ask me the first question.
+bb_typeahead	sonnet	switch system-design typeahead. Mid-level candidate. Ask me the first question.
+prod_whatsapp	sonnet	switch system-design whatsapp. Senior candidate. Ask me the first question.
+prod_newsfeed	sonnet	switch system-design newsfeed. Mid-level candidate. Ask me the first question.
+prod_uber	sonnet	switch system-design uber. Senior candidate. Ask me the first question.
+prod_ticketmaster	sonnet	switch system-design ticketmaster. Senior candidate. Ask me the first question.
+prod_googledocs	sonnet	switch system-design google-docs. Senior candidate. Ask me the first question.
+ops_monitoring_zh	sonnet	switch system-design。我是高级 SRE 候选人，请出第一题：设计一个分布式监控系统。
+ops_logging	sonnet	switch system-design distributed-logging. Senior SRE candidate. Ask me the first question.
+ops_scheduler	sonnet	switch system-design distributed-job-scheduler. Senior SRE candidate. Ask me the first question.
+ops_deploy	sonnet	switch system-design code-deployment. Senior SRE candidate. Ask me the first question.
+ops_dr	sonnet	switch system-design disaster-recovery-system-design. Senior SRE candidate. Ask me the first question.
+ai_rag	sonnet	switch system-design rag-system. Senior candidate. Ask me the first question.
+ai_llm	sonnet	switch system-design chatgpt-system-design. Senior candidate. Ask me the first question.
+os_boot	sonnet	switch system-design linux-boot-process. Mid-level candidate. Ask me the first question.
+hub_meta	sonnet	switch system-design meta-pe-interview. Senior candidate. Ask me the first question.
+fallback_parking	sonnet	switch system-design parking-lot. Mid-level candidate. Ask me the first question.
+free_pick	sonnet	switch system-design. I'm a senior SRE candidate. You pick a topic that fits and ask me the first question.
+explain_hashing	sonnet	explain consistent hashing
+zh_named	sonnet	switch system-design 短链服务。我是中级候选人，请出第一题。
+rate_limiter	sonnet	switch system-design rate-limiter. I'm a senior SRE candidate. Start the interview: ask me the first question.
+fde_case	sonnet	switch fde. I'm interviewing for a Forward Deployed Engineer role at a defense-tech company, senior level. Start the interview.
+fde_zh	sonnet	switch fde。我是中级候选人，目标是 Palantir 的 Delta 岗位，请出第一题。
+arxiv_attention	sonnet	Find the arXiv paper 'Attention Is All You Need', give me its arXiv id and a three-sentence summary of the abstract, plus the BibTeX entry.
+mcp_k8s	sonnet	You are running a hands-on interview round. Use the kubernetes tools (read-only) to inspect the current kubeconfig context: list namespaces and any pods that are not Running/Completed, and describe the first unhealthy one you find. Then ask me, the candidate, one diagnostic question about it.
+mcp_tf	sonnet	Using the terraform tools, look up the hashicorp/kubernetes provider and tell me the required arguments of the kubernetes_deployment resource.
+mcp_c7	sonnet	Using context7, look up the Helm docs and tell me the difference between helm upgrade --atomic and --wait, citing the doc section.
+mcp_search	sonnet	Use the fetch tool to read https://kubernetes.io/blog/2025/09/01/kubernetes-v1-34-dra-updates/ and summarize the DRA changes in 4 bullets.
+mcp_docker	sonnet	Using the docker tools, list the running containers on this host. Do not create or remove anything.
+ai_eng	sonnet	switch ai-engineering. I am a senior SRE candidate. Start the interview: ask me the first question.

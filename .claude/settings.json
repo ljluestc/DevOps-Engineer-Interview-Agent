@@ -1,0 +1,11 @@
+{
+  "enabledMcpjsonServers": [
+    "arxiv",
+    "fetch",
+    "duckduckgo",
+    "docker",
+    "kubernetes",
+    "context7",
+    "terraform"
+  ]
+}

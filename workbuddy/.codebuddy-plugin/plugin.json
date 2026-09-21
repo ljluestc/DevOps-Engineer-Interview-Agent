@@ -1,7 +1,7 @@
 {
   "name": "ops-interview-coach",
   "version": "1.0.0",
-  "description": "Ops/SRE/DevOps interview coach: deep concept explainers plus scored mock interviews across Linux, Kubernetes, SRE and GPU ops",
+  "description": "Ops/SRE/DevOps interview coach: deep concept explainers plus scored mock interviews across Linux, Kubernetes, SRE, GPU ops, system design, forward-deployed engineering and AI agentic tooling",
   "author": {
     "name": "Ops Interview Project",
     "email": "hello@ops-interview.dev"
@@ -39,6 +39,9 @@
   "quickPrompts": [
     { "en": "Run a senior ops engineer mock interview starting from Linux and kernel", "zh": "模拟一场高级运维工程师面试，从 Linux 与系统内核开始" },
     { "en": "Quiz me on a Kubernetes networking question (CNI/CRI/CSI)", "zh": "考我一道 Kubernetes 网络面试题（CNI/CRI/CSI）" },
-    { "en": "Explain the OSI model and how it maps to real-world troubleshooting", "zh": "讲透 OSI 七层模型以及它和真实排障的对应关系" }
+    { "en": "Explain the OSI model and how it maps to real-world troubleshooting", "zh": "讲透 OSI 七层模型以及它和真实排障的对应关系" },
+    { "en": "Run a system design interview: design a distributed rate limiter", "zh": "来一场系统设计面试：设计一个分布式限流器" },
+    { "en": "Run an FDE case interview: a hospital wants readmission prediction on 20 years of on-prem data", "zh": "来一场 FDE 案例面试：医院想用 20 年本地数据做再入院预测" },
+    { "en": "AI interview: how would you put guardrails on an agent that can change production?", "zh": "AI 面试：让 AI Agent 能改生产，你怎么设计护栏？" }
   ]
 }

@@ -1,4 +1,4 @@
-# 网络面试题（22 题）
+# 网络面试题（27 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。基础概念详见 [../../basics/02-network-osi.md](../../basics/02-network-osi.md)。
 
@@ -223,3 +223,94 @@
   - QUIC 基于 UDP：0/1-RTT 建连、无 TCP HOL、连接迁移（IP 变不断流）。运维：放行 UDP 443；中间设备（老防火墙/NAT）可能不友好；监控需支持 QUIC；nginx/Envoy/Caddy 开启。
 - **易错点**：防火墙只开 TCP 443，QUIC 握手失败回退 H2（仍可用但不优）。
 - **延伸**：Q5、Q16
+
+### Q23. 经过 LB / 代理后服务端拿不到真实客户端 IP，有哪些解法？PROXY 协议是什么？
+- **难度**：🔴 高级
+- **关键词**：PROXY protocol, X-Forwarded-For, 源 IP 保持, 四层代理, TLV
+- **概念速记**：TCP 连接经过代理中继后，服务端 `getpeername()` 拿到的是**代理的地址**，原始的源地址/端口就丢了。L7 协议可以靠 header 补救（HTTP 用 `X-Forwarded-For` / `Forwarded`），但**四层「哑代理」**（stunnel、HAProxy 的 TCP 模式、云厂商 NLB）不解析上层协议，没法插 header。
+- **参考答案**：
+  1. **PROXY 协议的思路**：不在每个请求里加东西，而是在**连接建立后、业务数据之前**发送一个一次性的头部，携带 `getsockname()/getpeername()` 级别的信息——地址族（IPv4/IPv6/UNIX）、套接字协议（TCP/UDP）、L3 源/目的地址与 L4 端口。发送方只需在连接后多发一段，接收方只需在连接后多 read 一次，**两侧都不需要理解上层协议**。
+  2. **v1 与 v2**：v1 是人类可读的文本（`PROXY TCP4 1.2.3.4 5.6.7.8 1234 80\r\n`，便于调试）；v2 是二进制，效率更高，并支持 **TLV 扩展**（可携带 SSL 信息、ALPN、唯一 ID 等）。
+  3. **几种解法对比**：
+     | 方案 | 层级 | 代价 |
+     |---|---|---|
+     | `X-Forwarded-For` / `Forwarded` | L7 | 仅 HTTP；可被伪造，需在可信边界剥离重写 |
+     | **PROXY 协议** | L4 | 协议无关、可靠；**两端必须都开启**，否则解析失败 |
+     | `externalTrafficPolicy: Local` | L4 | 不需要改协议，但有流量分布不均问题（见 Q24） |
+     | IPVS DR / 直接路由 | L2/L3 | 源 IP 天然保留，但组网受限 |
+  4. **最大的坑——必须两端同时开**：只在 LB 侧开而后端不认，后端会把 `PROXY TCP4 ...` 当作业务数据，导致协议错乱、连接被重置；反过来只在后端开而 LB 不发，后端会一直等头部直到超时。**切换时必须先加一个新端口/新监听器双跑，验证后再切流**，不能原地改。
+  5. **典型落地**：AWS NLB 开启 `proxy_protocol_v2` target group 属性 + Istio Ingress Gateway 上配 `proxy_protocol` listener filter，Envoy 解析后把真实源 IP 填进 `x-forwarded-for` 继续往后传；Nginx 用 `listen 80 proxy_protocol;` + `set_real_ip_from`。
+  6. **安全**：接收端必须**只信任来自已知代理 IP 的 PROXY 头部**，否则任何人都能伪造源 IP 绕过基于 IP 的访问控制。
+- **易错点**：只改一端导致全站连接失败；健康检查端口没同步开启 PROXY 协议（LB 探测失败，整组下线）；不限制可信来源导致 IP 白名单被绕过。
+- **延伸**：Q11、Q24、service-mesh Q18、来源：[Proxy 协议规范（HAProxy）](https://cloudnative.jimmysong.io/blog/proxy-protocol/)
+
+### Q24. Service 的 externalTrafficPolicy: Local 和 Cluster 有什么区别？各自代价是什么？
+- **难度**：🔴 高级
+- **关键词**：externalTrafficPolicy, SNAT, 源 IP, 负载不均, 健康检查
+- **概念速记**：`Cluster`（默认）允许任意节点接收流量后**再转发**到其他节点的 Pod，转发时做 SNAT，源 IP 被改写；`Local` 只把流量交给**本节点上的 Pod**，不转发、不 SNAT，源 IP 得以保留。
+- **参考答案**：
+  1. **对比**：
+     | | `Cluster`（默认） | `Local` |
+     |---|---|---|
+     | 源 IP | **丢失**（SNAT 成节点 IP） | **保留** |
+     | 额外网络跳数 | 可能多一跳 | 无 |
+     | 负载均衡 | 均匀（全集群 endpoint） | **按节点**，取决于 Pod 在节点上的分布 |
+     | 节点无 Pod 时 | 仍可接收并转发 | **丢弃**（靠健康检查摘除该节点） |
+  2. **`Local` 的负载不均问题（最常被忽略）**：云 LB 通常把流量**平均分给各节点**，而不是按 Pod 数量加权。若 A 节点有 1 个 Pod、B 节点有 3 个 Pod，两节点各拿 50% 流量 → A 上那个 Pod 承受的压力是 B 上每个 Pod 的 3 倍。
+     - 缓解：用 `topologySpreadConstraints` 让 Pod 在节点间均匀分布；或让 Ingress/Gateway 以 DaemonSet 方式每节点一个。
+  3. **`Local` 的健康检查机制**：kube-proxy 在每个节点开一个 `healthCheckNodePort`，没有本地 endpoint 时返回失败，云 LB 据此把该节点摘掉。**如果 LB 没配这个健康检查（或用了 TCP 探活而非 HTTP 探 healthCheckNodePort），流量会被打到没有 Pod 的节点然后黑洞掉。**
+  4. **`internalTrafficPolicy`**：K8s 1.26+ GA，是集群**内部**流量的对应开关，设 `Local` 可以让 Pod 只访问本节点的服务实例——适合 DaemonSet 型的日志/指标采集，能省跨节点带宽。
+  5. **和源 IP 保持方案的选择**：如果已经用 PROXY 协议（Q23）或 L7 的 XFF 拿到真实 IP，就不必为了源 IP 而用 `Local`，从而避开负载不均。**先想清楚要源 IP 干什么**（限流？审计？地域路由？），不同用途有不同的更优解。
+- **易错点**：为了拿源 IP 全局改成 `Local` 却没做 Pod 分布约束，造成热点；LB 健康检查配错导致流量黑洞；以为 `Local` 一定更快（少一跳）而忽视不均衡的代价。
+- **延伸**：Q11、Q23、kubernetes Q8、Q9
+
+### Q25. Calico 的数据平面和 BGP 部署模式有哪几种？大规模集群怎么选？
+- **难度**：🔴 高级
+- **关键词**：Calico, BGP, Full Mesh, Route Reflector, IPIP/VXLAN, eBPF 数据平面
+- **概念速记**：Calico 的核心是**纯三层路由**——不做 overlay 时，Pod IP 直接在底层网络上可路由，靠 **BGP** 把「哪个 Pod 网段在哪个节点」这件事通告出去。
+- **参考答案**：
+  1. **两种数据平面**：
+     - **iptables 模式**：成熟稳定、兼容性好、易调试；但规则数随 Service/Pod 增长，大规模下匹配开销和更新延迟明显。
+     - **eBPF 模式**：内核态处理，绕开 iptables/conntrack 链，延迟更低吞吐更高，并且**原生保留源 IP**（不需要 `externalTrafficPolicy: Local` 那套权衡，见 Q24），还能替代 kube-proxy。代价是对内核版本有要求、排障工具链不同。
+  2. **三种 BGP 拓扑**：
+     - **Full Mesh**：所有节点两两建立 BGP 邻居。简单，但会话数是 O(N²)，**一般只适合 ~100 节点以内**。
+     - **Route Reflector（RR）**：选少数节点作反射器，其他节点只与 RR 建邻居，会话数降到 O(N)。**中大规模的标准解法**，RR 要做冗余（至少 2 个）。
+     - **AS Per Rack**：每个机架一个自治域，与 ToR 交换机做 eBGP。最贴近数据中心网络架构，适合和网络团队协同的自建 IDC。
+  3. **要不要 overlay**：底层网络不允许 Pod 网段路由（典型是公有云 VPC 不认你的 Pod CIDR）时，用 **IPIP 或 VXLAN 封装**；同子网内可开 `CrossSubnet` 模式——同子网直接路由、跨子网才封装，兼顾性能与可达性。封装会带来 MTU 开销（见 Q18）和一定 CPU 成本。
+  4. **策略能力**（相比原生 NetworkPolicy 的扩展）：GlobalNetworkPolicy（跨 namespace）、HostEndpoint（保护宿主机网卡本身，这点很多方案没有）、基于 Service 的策略、有限的 L7 策略。
+  5. **选型口径**：已有 BGP 能力的自建 IDC + 要求扁平网络 → Calico BGP；公有云托管集群 → 通常直接用云厂商 CNI（VPC 原生 IP）；要强 L7 可观测与 eBPF 能力 → Cilium（见 Q26）。
+- **易错点**：几百节点还用 Full Mesh；RR 只部署一个成为单点；开了 IPIP 却没调 MTU 导致大包丢失；以为 Calico 一定不用 overlay。
+- **延伸**：Q18、Q20、Q26、kubernetes Q14、来源：[Kubernetes Handbook - Calico](https://jimmysong.io/book/kubernetes-handbook/networking-calico/)
+
+### Q26. Cilium 凭什么能替代 kube-proxy？「身份驱动的安全模型」是什么意思？
+- **难度**：🔴 高级
+- **关键词**：eBPF, kube-proxy replacement, identity, Hubble, Native Routing
+- **概念速记**：Cilium 用 **eBPF** 把网络逻辑挂在内核的 socket/网卡钩子上，绕开 iptables 那条越来越长的规则链；同时不按 IP 做策略，而是给每组标签相同的工作负载分配一个**数字身份（identity）**，策略在身份之间表达。
+- **参考答案**：
+  1. **替代 kube-proxy 的原理**：kube-proxy 的 iptables 模式为每个 Service 生成一串规则，匹配是**线性**的，几千个 Service 时规则数上万，更新一次要重写整张表 → 延迟高、CPU 抖动。Cilium 把 Service→Endpoint 的映射放进 **eBPF map（哈希查找，O(1)）**，并在 **socket 层**就完成地址转换（`connect()` 时直接改写目的地址），**连接根本不经过 conntrack 和 NAT**。
+  2. **身份驱动为什么重要**：K8s 里 Pod IP 是易变的，基于 IP 的规则必须随 Pod 重建不断更新。Cilium 把「带 `app=frontend` 标签的一组 Pod」映射成一个 identity，策略写成「identity A 可以访问 identity B 的 80 端口」——**Pod 重建、扩缩容都不需要改数据面规则**，只在身份变化时更新。这也让策略在**跨集群**时仍然成立（identity 可以跨集群同步）。
+  3. **网络模式**：
+     - **Overlay（VXLAN/Geneve）**：对底层网络零要求，开箱即用，有封装开销。
+     - **Native Routing**：Pod IP 直接由底层网络路由（配合 BGP 或云厂商 ENI），性能最好。
+  4. **Hubble 的价值**：eBPF 天然在数据路径上，所以能**零侵入**地导出每一条流的元数据——`hubble observe --verdict DROPPED` 直接告诉你「哪条策略挡了谁」，这是 iptables 方案很难做到的（见 observability Q21）。
+  5. **代价与前提**：对内核版本有要求（建议 5.10+，部分特性更高）；排障需要新的工具链（`cilium monitor`、`bpftool`），团队学习成本不低；L7 策略仍需拉起 Envoy（见 service-mesh Q24）。
+- **易错点**：以为 eBPF 能做所有事（L7 复杂处理仍需代理）；内核版本不满足就开高级特性；迁移掉 kube-proxy 时没清理残留的 iptables 规则。
+- **延伸**：Q25、kubernetes Q14、Q34、service-mesh Q24、observability Q21、来源：[Kubernetes Handbook - Cilium](https://jimmysong.io/book/kubernetes-handbook/networking-cilium/)
+
+### Q27. 怎么把 K8s 的 LoadBalancer Service 暴露到自建机房内网？BGP 方案是怎么工作的？
+- **难度**：🔴 高级
+- **关键词**：MetalLB, Cilium BGP, L2 模式, ECMP, VIP 通告
+- **概念速记**：`type: LoadBalancer` 在公有云由云厂商 controller 创建真实 LB；自建机房没有这个东西，Service 会永远停在 `<pending>`。解法是让集群**自己把 VIP 通告给网络设备**。
+- **参考答案**：
+  1. **两种模式**：
+     - **L2 / ARP 模式**（MetalLB Layer2）：由集群中的**一个**节点应答该 VIP 的 ARP，流量全部先到这个节点再转发。实现简单、不需要网络设备配合，但**该节点是带宽瓶颈和故障点**，切换靠重新发 ARP（有秒级中断）。
+     - **BGP 模式**（MetalLB BGP / Cilium BGP Control Plane）：多个节点用 BGP 向 ToR 交换机通告同一个 VIP，交换机用 **ECMP** 把流量哈希到多个节点 → **真正的多活 + 水平扩展带宽**。
+  2. **BGP 模式的细节**：
+     - 需要网络团队配合分配 AS 号、开放 BGP 邻居、确认交换机支持 ECMP。
+     - **ECMP 重哈希问题**：节点增删会导致哈希桶变化，部分已建立的连接被打到新节点而被 reset。缓解：交换机用 **resilient hashing / consistent hashing**；应用侧做好重连。
+     - 通常配合 `externalTrafficPolicy: Local`（见 Q24）——只有真正有 Pod 的节点才通告该 VIP，天然把没有后端的节点排除。
+  3. **Cilium BGP 的额外能力**：不仅能通告 LoadBalancer 的 VIP，还能直接通告 **Pod CIDR**，实现 Native Routing（见 Q26），一套 BGP 同时解决「Pod 可达」和「服务暴露」两件事，少一层封装。
+  4. **VIP 池管理**：用 `IPAddressPool`/`CiliumLoadBalancerIPPool` 声明可分配的地址段，按 namespace/标签做分配策略，避免团队之间抢地址。
+  5. **验证**：交换机上 `show ip bgp` 看是否收到路由且下一跳是多个节点；节点上 `cilium bgp routes` / `metallb` 的 speaker 日志。
+- **易错点**：用 L2 模式却期待带宽线性扩展；BGP 邻居没做冗余；VIP 段和现网地址冲突；忘了配 `externalTrafficPolicy` 导致没有后端的节点也通告 VIP。
+- **延伸**：Q20、Q24、Q26、kubernetes Q10

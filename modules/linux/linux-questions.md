@@ -1,4 +1,4 @@
-# Linux 系统面试题（25 题）
+# Linux 系统面试题（28 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。基础概念详见 [../../basics/01-linux-basics.md](../../basics/01-linux-basics.md)。
 
@@ -257,3 +257,71 @@
   - 内核/补丁、NTP、时区 locale、ulimit/nofile、swap 策略、内核参数、防火墙、SSH 加固、监控 agent、日志采集、磁盘分区、主机名/CMDB 登记、安全基线（SELinux/fail2ban）、备份。
 - **易错点**：漏接监控/审计，出问题无数据。
 - **延伸**：cloud-security Q（基线扫描）
+
+### Q26. 容器里的 Go / Java 运行时看到的是宿主机 CPU 还是 limit？怎么修？
+- **难度**：🔴 高级
+- **关键词**：GOMAXPROCS, GOMEMLIMIT, cgroup 感知, automaxprocs, resourceFieldRef
+- **概念速记**：`GOMAXPROCS` 默认取 **`runtime.NumCPU()`，也就是宿主机的核数**，它**不读 cgroup limit**。所以一个 `limits.cpu: 1` 的 Pod 跑在 64 核机器上，Go 会开 `GOMAXPROCS=64` —— 调度器疯狂在 64 个 P 之间切换，而 CFS 只给它 1 核的配额。
+- **参考答案**：
+  1. **后果**：大量上下文切换与自旋、GC 的 STW 时间变长、P99 延迟显著恶化，同时 CFS 限流（见 Q27）更频繁。社区（uber-go/automaxprocs）有大量数据表明这会造成**数量级**的性能问题。
+  2. **三种修法**：
+     - **`automaxprocs` 库**：`import _ "go.uber.org/automaxprocs"`，启动时读 cgroup 自动设置。有效，但**依赖应用主动引入**，且不管 `GOMEMLIMIT`。
+     - **K8s Downward API（推荐，无需改代码）**：
+       ```yaml
+       env:
+       - name: GOMAXPROCS
+         valueFrom: {resourceFieldRef: {resource: limits.cpu}}
+       - name: GOMEMLIMIT
+         valueFrom: {resourceFieldRef: {resource: limits.memory}}
+       ```
+       `resourceFieldRef` 会**向上取整** CPU（`1500m` → `2`）并以**字节**为单位给出内存，正好是这两个变量期望的语义；没设 limits 时取 `0`，而 Go 把 0 当作未设置，行为退化为默认——所以这套配置可以无脏写地铺到所有 Deployment。
+     - 手工硬编码：易错且和 limit 脱节，不推荐。
+  3. **`GOMEMLIMIT`（Go 1.19+）的价值**：给 GC 一个软内存上限。不设的话 Go 只按堆增长比例触发 GC，容器接近 memory limit 时可能来不及回收就被 **OOMKilled**；设成略低于 limit（如 limit 的 90%）能让 GC 提前发力，把「被内核杀掉」变成「GC 变频繁」——**这是容器里 Go 服务最值得做的一项调优**。
+  4. **同类问题在 JVM**：老版本 JVM 也不识别 cgroup，靠 `-XX:+UseContainerSupport`（JDK 10+ 默认开）解决；`MaxRAMPercentage` 比写死 `-Xmx` 更适合容器。Node.js、Python 的线程池默认值也有同类问题。
+- **易错点**：以为容器里 `nproc`/`NumCPU()` 会自动等于 limit；设了 `GOMAXPROCS` 但忘了 `GOMEMLIMIT` 仍然 OOM；用 `requests.cpu` 而不是 `limits.cpu` 做 resourceFieldRef。
+- **延伸**：Q7、Q27、kubernetes Q18、来源：[GOMAXPROCS and GOMEMLIMIT in containers (howardjohn)](https://blog.howardjohn.info/posts/gomaxprocs/)
+
+### Q27. CPU limit 导致的 CFS 限流（throttling）是什么？为什么会有延迟毛刺？
+- **难度**：🔴 高级
+- **关键词**：CFS quota, cfs_period_us, throttled_time, 延迟毛刺, 突发
+- **概念速记**：K8s 的 `limits.cpu` 落到 cgroup 的 `cpu.cfs_quota_us` / `cpu.cfs_period_us`。默认周期 **100ms**，`limits.cpu: 1` 意味着「每 100ms 最多用 100ms CPU 时间」。**一旦在某个周期内用完配额，进程会被强制冻结到下个周期开始**——即使机器整体很空闲。
+- **参考答案**：
+  1. **毛刺从哪来**：多线程程序在 100ms 周期的前 20ms 就把 4 个线程 × 25ms = 100ms 的配额用光，剩下 80ms 全部被冻结 → 这期间到达的请求全部排队 → P99 出现规律性的**几十毫秒尖刺**，而平均 CPU 使用率看起来只有 20%。**「CPU 用得不多但延迟很差」是这个问题的典型画像。**
+  2. **怎么确认**：
+     ```bash
+     cat /sys/fs/cgroup/cpu.stat        # v2: nr_throttled / throttled_usec
+     # 指标：container_cpu_cfs_throttled_periods_total / container_cpu_cfs_periods_total
+     ```
+     **限流比例（throttled_periods / periods）持续 > 几个百分点**就值得处理。
+  3. **处理手段**：
+     - 把 `GOMAXPROCS`/线程池大小对齐到 limit（见 Q26）——**减少并发线程数往往比加配额更有效**，因为它让配额消耗更平滑。
+     - 适当调高 `limits.cpu`，或对延迟敏感服务**干脆不设 CPU limit**（只设 requests），靠 requests 保证下限、靠节点不超卖控制风险。这是很多大厂的实际做法，但**前提是节点上没有恶邻**。
+     - 调小 `cpu.cfs_period_us`（如 10ms）能让冻结粒度更细、毛刺更小，但增加调度开销；kubelet 的 `--cpu-cfs-quota-period` 可改。
+     - 关键服务用 **Guaranteed QoS + static CPU Manager**（独占核，见 kubernetes Q46 的前提条件），彻底避开 CFS 配额。
+  4. **历史坑**：较老的内核（< 4.18）存在 CFS 配额统计 bug，会在未用满配额时就限流，升级内核可解。
+- **易错点**：只看 CPU 使用率不看 throttled 指标；无脑给所有服务设 limit == requests；把限流误判为「应用代码慢」去优化业务逻辑。
+- **延伸**：Q1、Q7、Q26、kubernetes Q18
+
+### Q28. 容器里 free / top / nproc 看到的为什么是宿主机的数据？该怎么看容器真实资源？
+- **难度**：🟡 中级
+- **关键词**：/proc 未 namespace 化, lxcfs, cgroup v2, 容器可观测
+- **概念速记**：`free`、`top`、`nproc` 这些工具读的是 `/proc/meminfo`、`/proc/cpuinfo`、`/proc/stat`，而 **`/proc` 并没有被 cgroup namespace 隔离**——容器里读到的是**宿主机**的全局视图。容器只是被 cgroup 限制了「能用多少」，但它「看到的」仍是全部。
+- **参考答案**：
+  1. **后果**：
+     - 运维在容器里 `free -m` 看到 256GB 可用，实际 limit 只有 2GB，误判「内存很充裕」。
+     - 应用按 `nproc` 初始化线程池/连接池（JVM、Nginx `worker_processes auto`、各类 SDK），开出远超配额的并发 → 直接触发 Q26/Q27 的问题。
+  2. **正确的查看方式**（cgroup v2）：
+     ```bash
+     cat /sys/fs/cgroup/memory.max      # 内存上限（max 表示不限）
+     cat /sys/fs/cgroup/memory.current  # 当前用量
+     cat /sys/fs/cgroup/cpu.max         # "配额 周期"，如 "200000 100000" = 2 核
+     cat /sys/fs/cgroup/cpu.stat        # 含限流统计
+     ```
+     v1 对应 `/sys/fs/cgroup/memory/memory.limit_in_bytes` 等路径。
+  3. **解法**：
+     - **应用侧显式配置**，不要用 `auto`——这是最可靠的做法（见 Q26 的 Downward API 写法）。
+     - **lxcfs**：在节点上部署，把 `/proc/meminfo`、`/proc/cpuinfo` 等文件用 FUSE 挂载成「容器视角」的版本，让 `free`/`top` 看起来正常。对无法改造的存量应用有用，但引入了额外组件和 FUSE 的故障面。
+     - 监控用 **cAdvisor/kubelet 指标**（`container_memory_working_set_bytes`、`container_cpu_usage_seconds_total`），而不是容器内部的工具。
+  4. **OOM 判断要看对指标**：K8s 的 OOMKill 判据是 **`working_set`**（≈ RSS + 活跃 page cache），不是 `container_memory_usage_bytes`（含可回收 cache，会虚高）。用错指标会得出「内存没满为什么被杀」的错误结论。
+- **易错点**：在容器里用 `free` 做容量判断；Nginx/JVM 用 auto 配置；监控告警用 `memory_usage_bytes` 导致大量误报。
+- **延伸**：Q3、Q7、Q26、Q27、kubernetes Q5、Q18

@@ -15,7 +15,8 @@
 智能体不内置题目，而是**直接读取本仓库的知识库**，保证与题库同步、不重复维护：
 
 - `basics/` — 基础概念深度篇（Linux / 网络·OSI / Docker·Dockerfile / K8s·CRI·CNI·CSI / Ansible / AI·GPU）
-- `modules/` — 200+ 道标准化面试题（10 大模块）
+- `modules/` — 366 道标准化面试题（14 大模块，含 `system-design/` 35 题、`fde/` 30 题、`ai-engineering/` 26 题）
+- `system-design/` — git 子模块（630 个系统设计主题语料），目录见 `modules/system-design/system-design-catalog.md`
 
 > 所以在使用时，请让模型能访问到本仓库（克隆到本地，或在支持文件读取的工具中打开本目录）。
 > 若环境无法读取文件（例如网页版纯对话），可把 `basics/` + `modules/` 的内容一并作为上下文附上。

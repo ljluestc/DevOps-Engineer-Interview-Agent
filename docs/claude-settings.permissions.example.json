@@ -1,0 +1,42 @@
+{
+  "_comment": "Copy the `permissions` block into .claude/settings.json (project, shared) or .claude/settings.local.json (personal). Deny always wins over allow. See README → 权限配置.",
+  "enabledMcpjsonServers": [
+    "arxiv",
+    "fetch",
+    "duckduckgo",
+    "docker",
+    "kubernetes",
+    "context7",
+    "terraform"
+  ],
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "MultiEdit",
+      "Glob",
+      "Grep",
+      "Agent",
+      "WebFetch",
+      "WebSearch",
+      "Bash(*)",
+      "mcp__arxiv__*",
+      "mcp__fetch__*",
+      "mcp__duckduckgo__*",
+      "mcp__docker__*",
+      "mcp__kubernetes__*",
+      "mcp__context7__*",
+      "mcp__terraform__*"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(**/.env)",
+      "Read(**/*.pem)",
+      "Read(**/id_rsa)",
+      "Bash(rm -rf /:*)",
+      "Bash(rm -rf ~:*)"
+    ]
+  }
+}

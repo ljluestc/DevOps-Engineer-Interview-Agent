@@ -1,4 +1,4 @@
-# 监控 / 可观测性面试题（18 题）
+# 监控 / 可观测性面试题（23 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。
 
@@ -147,3 +147,106 @@
 - **参考答案**：Filebeat（轻、Elastic 生态）；Fluent Bit（极轻、K8s 原生、吞吐高）；Vector（Rust、高性能、变换路由）。关注背压、资源占用、可靠性（至少一次）、多租户隔离。
 - **易错点**：采集 agent 资源不设限，反噬业务节点。
 - **延伸**：Q5；linux Q17
+
+### Q19. OpenTelemetry Collector 的架构是什么？有哪几种部署模式，怎么选？
+- **难度**：🔴 高级
+- **关键词**：OTel Collector, receiver/processor/exporter, agent 模式, gateway 模式, 尾部采样
+- **概念速记**：Collector 是一条可组装的流水线：**receiver**（收数据，支持 OTLP/Prometheus/Jaeger/Zipkin/filelog 等）→ **processor**（批处理、内存限制、属性增删、采样）→ **exporter**（发往 Prometheus/Tempo/Loki/Kafka/厂商后端），由 **pipeline** 按信号类型（traces/metrics/logs）串起来。
+- **参考答案**：
+  1. **三种部署形态**：
+     | 模式 | 形态 | 适合 |
+     |---|---|---|
+     | **Agent / DaemonSet** | 每节点一个，就近收集 | 采集主机与容器日志、给数据打节点级标签、降低应用侧开销 |
+     | **Sidecar** | 每 Pod 一个 | 需要强隔离或按应用定制处理；成本最高 |
+     | **Gateway / Deployment** | 集中一组，接收 agent 汇聚的数据 | 做**需要全局视野**的处理：尾部采样、跨服务聚合、统一鉴权与出口限流 |
+     生产常见是 **agent + gateway 两层**：agent 负责就近采集与基础打标，gateway 负责统一策略与后端路由。
+  2. **为什么尾部采样必须放 gateway**：头部采样（head sampling）在 trace 开始时就决定采不采，简单但会**丢掉正好出错/慢的那条**；尾部采样（tail sampling）要等一条 trace 的所有 span 都到齐才判断（「有错误就留、P99 慢的留、正常的按 1% 采」）。这要求**同一条 trace 的所有 span 落到同一个 Collector 实例**——所以 gateway 前必须按 `trace_id` 做一致性哈希负载均衡（`loadbalancing` exporter），否则尾部采样直接失效。
+  3. **必配的 processor**（漏了会出事故）：
+     - `memory_limiter`：**必须放在 pipeline 第一位**，防止后端变慢时 Collector 自己 OOM 把数据全丢。
+     - `batch`：批量发送，显著降低后端压力。
+     - `resourcedetection` / `k8sattributes`：自动补上 `k8s.pod.name`、`k8s.namespace` 等资源属性，这是后续关联的基础。
+  4. **可靠性设计**：Collector 本身要多副本 + HPA；开 `sending_queue` 与磁盘持久化队列应对后端抖动；后端故障时的行为要明确（丢弃还是阻塞），**可观测系统自己不能成为故障放大器**。
+  5. **为什么值得上 OTel**：统一的 SDK 与协议（OTLP）让「换后端」不再需要改应用代码；`otelcol` 还能作为 Prometheus 的 remote write 中转与格式转换枢纽，逐步替换存量 agent。
+- **易错点**：不配 `memory_limiter`；把尾部采样放在 agent 层导致采样决策错误；gateway 前用普通轮询负载均衡打散了同一条 trace。
+- **延伸**：Q4、Q9、Q20、Q22
+
+### Q20. 指标基数爆炸（cardinality explosion）怎么发现、怎么治理？
+- **难度**：🔴 高级
+- **关键词**：cardinality, 时间序列, label, Prometheus TSDB, 高基数
+- **概念速记**：一个指标的时间序列数 = 各 **label 取值的笛卡尔积**。加一个取值 1000 的 label，序列数就 ×1000。Prometheus 的内存、查询延迟与序列数**直接正相关**——基数爆炸是监控系统最常见的自伤型故障。
+- **参考答案**：
+  1. **典型爆炸源**：`user_id`、`request_id`、`trace_id`、**未归一化的 URL path**（`/order/12345`）、容器 ID、Pod 名（滚动更新时不断产生新值）、错误消息原文、IP 地址。
+  2. **怎么发现**：
+     ```promql
+     # 每个指标名的序列数 TOP
+     topk(20, count by (__name__)({__name__=~".+"}))
+     # 某指标里哪个 label 基数最高
+     count(count by (le, path, pod) (http_request_duration_seconds_bucket))
+     ```
+     还可以看 `/status/tsdb` 页面（Prometheus 自带 Head Cardinality Stats）、`prometheus_tsdb_head_series` 指标趋势、以及 `scrape_samples_scraped` 突增的 target。
+  3. **治理手段（按处理位置由近到远）**：
+     - **源头**：应用侧不要把高基数值放进 label，路径先模板化（`/order/{id}`）。
+     - **采集侧**：`metric_relabel_configs` 用 `labeldrop`/`drop` 丢掉不需要的 label 与指标；给 target 加 `sample_limit`。
+     - **存储侧**：Thanos/Mimir/VictoriaMetrics 有各自的基数限流与按租户配额。
+     - **治理机制**：给每个团队设序列数配额并做成看板，新增指标走评审——纯技术手段挡不住持续增长。
+  4. **Histogram 是隐藏放大器**：一个 Histogram 的序列数 = `bucket 数 + 2`（`_sum`/`_count`）**再乘以**其他 label 的组合。默认 10+ 个 bucket 意味着 12 倍放大。所以「给 Histogram 加一个 label」的代价远大于给 Counter 加。原生直方图（native histogram）能显著缓解这个问题。
+  5. **同类问题在网格里更严重**：Istio 的 `istio_requests_total` 自带大量 label，且指标常驻 Envoy 内存，加高基数 label 会直接把 sidecar 打 OOM（见 service-mesh Q13）。
+- **易错点**：只在 Prometheus 侧 drop，应用仍在生成（Envoy/exporter 的内存已经被吃掉了）；不知道 Histogram 的乘数效应；把 Pod 名当作 label 而不用 `service`/`deployment` 这类稳定维度。
+- **延伸**：Q2、Q13、service-mesh Q13
+
+### Q21. 怎么观测「服务之间到底在怎么调用」？Kiali / Hubble / service graph 各解决什么？
+- **难度**：🟡 中级
+- **关键词**：服务拓扑, Kiali, Hubble, 调用关系, 依赖发现
+- **概念速记**：拓扑图有三种生成来源，精度与代价各不相同：**指标推导**（从带对端标签的指标聚合）、**流量观测**（eBPF 直接看内核连接）、**追踪聚合**（从 trace 的 span 父子关系还原）。
+- **参考答案**：
+  1. **Kiali（网格视角）**：数据源是 Istio 的 `istio_requests_total` 等指标——每条指标都带 `source_workload` 和 `destination_service`（靠 Metadata Exchange 拿到，见 service-mesh Q13），按这两个维度聚合就能画出服务图，并叠加成功率、RPS、mTLS 状态。还能做配置校验（等价于 `istioctl analyze` 的可视化）。**局限**：只覆盖被网格纳管的流量。
+  2. **Hubble（Cilium / eBPF 视角）**：在内核态直接观测 socket 层流量，**不需要 sidecar、不需要应用改造**，能看到 L3/L4 全量连接（包括没进网格的、被 NetworkPolicy drop 的）。特别适合回答「这条 NetworkPolicy 到底挡了谁」——`hubble observe --verdict DROPPED`。**局限**：L7 解析能力有限（需要额外开启且只支持部分协议）。
+  3. **追踪聚合（OTel service graph / Tempo metrics-generator）**：从真实 trace 还原调用链，是**唯一能反映「一次用户请求的完整路径」**的方式，能定位跨服务的长尾延迟。**局限**：依赖埋点覆盖率与采样率，采样低时拓扑会不完整。
+  4. **实战用法**：
+     - 「有没有没在网格里/没被策略覆盖的流量」→ Hubble。
+     - 「服务 A 的下游有哪些、成功率如何」→ Kiali（快、无采样偏差）。
+     - 「这次慢在哪一跳」→ 追踪。
+     三者是互补关系，成熟平台通常都会有。
+  5. **落地价值**：迁移/下线服务前先用拓扑确认「还有谁在调我」；做 NetworkPolicy 默认拒绝前先用观测数据自动生成白名单（Cilium 的 policy 推荐、Kiali 的流量图）——**先观测再收紧**是避免把生产打挂的唯一正确顺序。
+- **易错点**：拿低采样率的 trace 画拓扑并当成完整依赖图；只看 Kiali 就以为掌握了全部流量（网格外的看不到）；不做观测直接上 NetworkPolicy 默认拒绝。
+- **延伸**：Q9、Q17、kubernetes Q15、service-mesh Q13
+
+### Q22. 三支柱怎么才算「真正打通」？trace_id 关联与 exemplar 是什么？
+- **难度**：🔴 高级
+- **关键词**：关联, trace_id, exemplar, 语义约定, W3C traceparent
+- **概念速记**：把 Metrics/Logs/Traces 三套系统都装上**不等于**可观测性好。真正的价值在于「从一个告警能三次点击跳到根因」，这需要三者之间有**共享的关联键**。
+- **参考答案**：
+  1. **三条关联链路**：
+     - **Metrics → Traces：exemplar**。Prometheus 的 exemplar 允许在直方图的某个 bucket 上附带一个具体的 `trace_id`。于是「P99 延迟涨了」的图上可以直接点进一条**真实的慢请求** trace——这是从「知道有问题」到「看到问题」最短的路径。需要应用 SDK 支持（OTel 默认支持）、Prometheus 开 `--enable-feature=exemplar-storage`、Grafana 配好 data source 链接。
+     - **Traces → Logs**：日志里必须打印 `trace_id` / `span_id`（结构化日志字段，不是拼在消息里）。Loki/ES 按 trace_id 一查就能拿到这次请求的全部日志。
+     - **Logs → Traces**：反向同理，从一条报错日志跳回完整调用链。
+  2. **前提一：上下文传播**。跨服务必须传递 **W3C `traceparent`** header（OTel 默认格式）。常见断链点：
+     - 消息队列（要在消息属性里手动带上 context）。
+     - 线程池/异步任务（context 没跟着切换）。
+     - 老的网关或中间件把未知 header 剥掉。
+     - 不同框架用了不同传播格式（B3 vs W3C）没配互转。
+  3. **前提二：统一的资源属性**。三种信号上都要有相同的 `service.name`、`k8s.namespace.name`、`deployment.environment` 等 —— 遵循 **OTel 语义约定（semantic conventions）**，否则字段名对不上就无法跨信号跳转。这正是 OTel 相比各自为政的 agent 的核心价值。
+  4. **成本控制的正确做法**：Traces 用**尾部采样**（保留错误与慢请求，见 Q19）；Logs 分级（错误全留、访问日志抽样或只留聚合）；Metrics 控基数（见 Q20）。**指标永远全量**（便宜、适合告警），trace 和 log 按需，三者分工明确。
+  5. **验收标准**：拿一个真实的线上告警走一遍——从告警 → 指标图 → exemplar 点进 trace → 从 span 跳到对应日志。**走不通就是没打通。**
+- **易错点**：三套系统各自为政，字段名不统一，人肉在三个 UI 之间按时间戳对；日志里没有 trace_id；只做了 head sampling 导致出错的 trace 恰好没被采到。
+- **延伸**：Q4、Q9、Q19、Q20
+
+### Q23. Falco 的运行时安全生态怎么落地？从内核探针到告警响应，一条完整链路上有哪些组件？
+- **难度**：🔴 高级
+- **关键词**：Falco, 系统调用, eBPF probe / 内核模块, falco_rules, Falcosidekick, Falcosidekick UI, falcoctl, 响应引擎, k8s audit
+- **概念速记**：
+  - **Falco**：CNCF 毕业的运行时安全项目，在**内核层解析系统调用**（syscall），按规则实时判断容器 / 主机 / K8s 里的可疑行为并出告警。数据源除 syscall 外还有 **K8s audit 事件**（`k8s_audit_rules.yaml`）与插件（Cloudtrail 等）。
+  - **驱动（driver）**：拿到 syscall 的方式有三种——**内核模块**、**eBPF probe**（`falco-driver-loader bpf`）、以及更新的 **modern eBPF**（CO-RE，免编译）。捐给 CNCF 的正是内核模块、eBPF probe 与 libs（libsinsp/libscap）。
+- **问题**：团队要在 K8s 上把 Falco 从「装上」做到「告警能被人处理、还能自动响应」，请描述这条链路上的组件、规则怎么管、告警往哪送，以及有哪些坑。
+- **参考答案**：
+  1. **部署形态**：Falco 以 **DaemonSet** 每节点一个，Helm 装（`falcosecurity/falco`）；节点直装时配置在 `/etc/falco/`。选驱动：新内核优先 **modern eBPF**（免编译、少踩内核版本坑），否则 eBPF probe 或内核模块。
+  2. **规则管理**：内置 `falco_rules.yaml`，本地覆盖放 `falco_rules.local.yaml`，K8s 审计规则 `k8s_audit_rules.yaml`；规则由 **宏（macro）+ 列表（list）+ 规则（rule）** 组成，输出字段可自定义（如 `[%evt.time][%container.id] [%container.name]`）。典型规则：容器内起交互 shell、写敏感目录、读 `/etc/shadow`、意外的出站连接、挂载穿透。**falcoctl** 做规则 / 插件的分发与版本管理。
+  3. **告警外发（关键的一环）**：Falco 本身只产生事件，**Falcosidekick** 是扇出网关，把告警转发到 Slack、PagerDuty、Kafka、AWS Lambda、Elasticsearch、Loki、SIEM 等几十种后端；**Falcosidekick UI** 给一个轻量的事件查看界面。没有 sidekick 时告警只落 stdout/syslog，容易没人看。
+  4. **响应引擎（自动处置）**：Falcosidekick + **response engine**（如 Falco Talon）可按规则联动动作——给 Pod 打隔离标签、加 NetworkPolicy、`kubectl delete`/缩容到零做取证、终止进程。要点是**先审计后处置**，自动删 Pod 前想清楚会不会误杀。
+  5. **与可观测 / 安全体系对齐**：Falco 事件带 MITRE ATT&CK 语义，正好和 RBAC 攻击面审计（cloud-security Q17）对齐——审计告诉你「哪条路径可达」，Falco 告诉你「有人正在走这条路径」。事件应进 SIEM 长期留存并接 on-call。
+  6. **坑**：规则过多 / 太宽导致**告警风暴**没人看（和 observability Q6 的抑制 / 分组同理）；驱动与内核版本不匹配导致 Falco 起不来（modern eBPF 缓解）；只装 Falco 不接 sidekick 等于没有告警通路；把 syscall 规则和 k8s audit 规则混为一谈（数据源不同）。
+- **易错点 / 面试官关注**：
+  - 以为「装了 Falco 就安全了」，说不出告警外发与响应这半条链路。
+  - 分不清三种驱动的取舍；不知道 modern eBPF。
+  - 不会把运行时检测（Falco）与静态 RBAC 审计、准入拦截放在纵深防御里各就各位。
+- **延伸**：Q6（告警抑制）、Q17（eBPF）、cloud-security Q10、Q15、Q17、来源：[developer-guy/awesome-falco](https://github.com/developer-guy/awesome-falco)（Falco 官方项目、社区工具与文章的清单）、[Falco 官方文档](https://falco.org/docs/)
