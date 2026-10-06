@@ -57,6 +57,8 @@ EXPECT = {  # name -> substring expected among read paths (topic folder), or Non
     "mcp_protocol": "collections/k8s-web-archive.md",
     "es_ops": "collections/k8s-web-archive.md",
     "quiz_distcache_zh": "collections/k8s-web-archive.md",  # HelloInterview distributed-cache group (2026-10-03)
+    "sd_quizbank10": "collections/system-design-quiz-bank.md",  # 10-at-a-time from the submodule quiz bank (2026-10-06)
+    "sd_batch10": "collections/system-design-exercises-and-notes.md",  # 10-at-a-time system-design round (2026-10-06)
     "acc_extension_choice": "collections/awesome-claude-code.md",   # awesome-claude-code ecosystem rounds (added 2026-09-21)
     "acc_hook_guardrail": "collections/awesome-claude-code.md",
     "acc_cost_zh": "collections/awesome-claude-code.md",

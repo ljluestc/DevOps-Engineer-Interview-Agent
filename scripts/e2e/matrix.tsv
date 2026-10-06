@@ -57,3 +57,5 @@ sd_resolve_typo	sonnet	switch system-design chatpgt. I'm a mid-level candidate. 
 sd_resolve_zh	sonnet	设计一个秒杀系统。我是高级候选人，请先说明你把这个中文题名解析到了哪个主题目录，然后开始面试，一次一个问题。
 sd_resolve_thin	sonnet	switch system-design airtag. I'm a senior candidate. If the corpus documentation for this topic is thin, say so plainly and tell me how you will run the round anyway, then ask the first question.
 quiz_distcache_zh	sonnet	switch system-design distributed-cache。我是高级 SRE 候选人，请从 collections/k8s-web-archive.md 的「HelloInterview 分布式缓存拆解」分组出一道深挖题（热 key、一致性哈希或高可用），一次一题，并说明出自哪一组。
+sd_batch10	sonnet	switch system-design. Senior SRE candidate. Ask me 10 system-design questions at once, drawn from collections/system-design-exercises-and-notes.md, numbered, and say which group each comes from.
+sd_quizbank10	sonnet	quiz system-design. Senior SRE candidate. Ask me 10 questions at once from collections/system-design-quiz-bank.md, from at least 5 different topics, numbered, naming each topic.

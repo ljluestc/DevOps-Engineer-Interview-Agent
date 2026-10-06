@@ -18,18 +18,22 @@
 | `veeramalla-devops-interview-guide.md` | [iam-veeramalla/DevOps-Interview-Guide](https://github.com/iam-veeramalla/DevOps-Interview-Guide)（2025–2026 年社区投稿的真实面试经历，151 份写实、86 家公司 + Others；仓库未声明许可证，仅收录题目文本） | 3024 题 | 按公司 / 岗位 / 年限分组（Amazon、JPMorgan、IBM、Infosys、TCS、Deloitte、EPAM、Capgemini、Oracle、SAP、Sony …），Kubernetes / Docker / Terraform / 云 / CI-CD / Linux / 脚本 / SRE 基础；文末附主题 → 模块映射 |
 | `awesome-claude-code.md` | [hesreallyhim/awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)（榜单本体 CC BY-NC-ND 4.0，**未收录其点评文字**；题目与要点由本项目原创撰写） | 392 题 | 22 组：生态选型与准入尽调 → Start Here 官方心智模型 → From Anthropic 一手资料 → 扩展机制选型（CLAUDE.md / Rules / Skills / Subagents / Hooks / Plugins）→ Slash Commands → Hooks → Agent Skills → 记忆与上下文持久化 → 多 Agent 编排 → Ralph Wiggum 循环 → 会话可观测与事件流 → 用量成本与配额 → Status Lines → 安全 / 沙箱 / 供应链 → Provider 与运行时集成 → 替代客户端与远程控制 → 配置 lint 与规则治理 → IaC / K8s / OTel 专项技能 → 测试与审查质量门 → 文档知识与学习 → 设计写作创意 → 开放判断题；每题附要点，🟢🟡🔴 标难度，☆ 高频，文末附分组 → 模块映射与难度分层选题表 |
 | `aws-managed-services-only.md` | 用户自有仓库 `~/dev/aws-demo`（58 篇 `docs/*-on-aws.md`、`docs/system-design/` 下 11 篇经典系统设计的 AWS-only 渲染页、`search-platform` 的 20 篇 Tip 文档，2026-09-25/26「AWS-only 改造」后的状态；题目与要点由本项目提炼撰写） | 195 题 | 13 组：「只用托管服务」这条约束 → 26 服务目标架构与 chosen/rejected 选型表 → IRSA 与 Secrets Manager（vs External Secrets / CSI）→ CloudWatch vs AMP+Managed Grafana vs 自建 → AWS Backup 与「没有服务备份 K8s 对象」的缺口（git 漂移检查 vs Velero）→ GPU on EKS 托管边界（加速 AMI / DCGM / gang scheduling / HyperPod）→ VPC Lattice vs 网格 → CodePipeline 与 EKS 托管 Argo CD（push vs pull）→ MSK/Kinesis、ElastiCache/MemoryDB 与 AI 存储 → MCP/Agent 在 AWS 上的缺口 → 未验证架构的写法（Verified, and not）→ **11 个经典系统设计题的 AWS-only 渲染**（短链 / IM / 票务 / 定时任务 / 通知 / 爬虫 / 信息流 / 直播 / 文件存储 / 分布式缓存 / Web 分析，65 题）；每题附要点，🟢🟡🔴 标难度，☆ 高频 |
+| `system-design-exercises-and-notes.md` | 用户按 URL 指定的三个仓库的系统设计部分：[bregman-arie/devops-exercises](https://github.com/bregman-arie/devops-exercises) System Design 章节（CC BY-NC-ND 3.0，**只引主题与链接，题目原创**）、[ljluestc/ai_interview_note](https://github.com/ljluestc/ai_interview_note)（推荐 / 搜索 / 对话 / RAG，要点转述）、[ljluestc/meta-pe-interview-guide](https://github.com/ljluestc/meta-pe-interview-guide)（用户自有，监控系统设计代码）；题目与要点由本项目撰写 | 63 题 | 9 组：系统设计基础（单点 / CDN / 分层 / 服务拆分）→ 可扩展性与韧性 → 缓存与迁移 → 设计题（视频 / 图片 / 短链 / Pastebin / 爬虫）→ 推荐系统设计 → 搜索系统设计 → 对话系统与 RAG → Meta PE 监控系统设计（从教学代码到 Prometheus / Gorilla / Alertmanager）→ Meta PE 全量主机「设计 + 排障」；每题附要点，🟢🟡🔴 标难度，☆ 高频 |
+| `system-design-quiz-bank.md` | 用户自有仓库 [ljluestc/system-design](https://github.com/ljluestc/system-design)（即 `system-design/` 子模块）各主题的 `06-quiz.md` 与 `20-interview-drills.md`；由 `scripts/build_system_design_quiz_bank.py` 自动生成，剔除约 3,900 道跨主题重复的模板题，变体目录经 resolver 折叠 | 458 题 | 7 组（按 catalog 分类）：基础与方法论 → 基础组件 → 产品端到端 → 运维与基础设施 → AI/ML → 操作系统 → 综合题库，共 70 个主题；🟡 主题 quiz（要点取自答案首段）、🔴 drill、🟢 速答 |
 
-> **合计**：collections 共收录 **6556 题**（1502 + 231 + 89 + 88 + 68 + 159 + 111 + 697 + 3024 + 392 + 195，去重前）。
+> **合计**：collections 共收录 **7077 题**（1502 + 231 + 89 + 88 + 68 + 159 + 111 + 697 + 3024 + 392 + 195 + 63 + 458，去重前）。
 
 ## 版权与使用口径（重要）
 
 - 本目录**仅收录题目列表**（公开网页上可直接阅读的问题文本），**不收录**原作者的参考答案、个人心得与付费内容。
 - 每题保留原文措辞与 ☆ 高频标记；分组沿用原文。
 - 如需商用或对题目做二次加工分发，请自行评估原作者版权声明；本项目以「学习与参考」为目的收录，并明确标注出处。
-- 收录日期：2026-08-05（崔亮系列）、2026-08-19（1502 题合集）、2026-09-20（MongoDB Zero-to-Hero、K8s 本地资料库、经典论文、K8s 网页存档与本地仓库、Veeramalla DevOps 真题）、2026-09-21（Awesome Claude Code 生态）、2026-09-26（AWS 托管服务改造）、2026-10-03（K8s 网页存档补 HelloInterview 分布式缓存组）。
+- 收录日期：2026-08-05（崔亮系列）、2026-08-19（1502 题合集）、2026-09-20（MongoDB Zero-to-Hero、K8s 本地资料库、经典论文、K8s 网页存档与本地仓库、Veeramalla DevOps 真题）、2026-09-21（Awesome Claude Code 生态）、2026-09-26（AWS 托管服务改造）、2026-10-03（K8s 网页存档补 HelloInterview 分布式缓存组）、2026-10-06（系统设计练习与笔记、系统设计题库）。
 - `mongodb-zero-to-hero.md` 是例外：原仓库是 Apache-2.0 教程而非题库，题目与要点由本项目从教程改写提炼，可自由使用，保留出处即可。
 - `k8s-local-library.md` 同为提炼件：来源是本机 15 份 PDF（商业电子书 / 公开审计报告 / 演讲 PPT / 社区笔记），题目与要点由本项目改写，不含逐字摘录；两份商业资料（CKS Book、全速云课件）只提炼主题与开源部分。文件头有逐份的版权口径表。
 - `classic-papers.md` 同为提炼件：来源全部是公开论文 / 白皮书（版权归作者与出版方），题目与要点由本项目改写；书架索引里的教材**不出题**。
+- `system-design-quiz-bank.md` 为**脚本生成件**（`scripts/build_system_design_quiz_bank.py`，勿手改）：来源是用户自有的 system-design 子模块，答案要点直接取自原答案首段；子模块更新后重新运行脚本。
+- `system-design-exercises-and-notes.md` 同为提炼件：devops-exercises 为 CC BY-NC-ND 3.0（禁止演绎），**不收录其任何题目原文或答案**，只引用章节主题与链接，题目与要点为本项目原创；ai_interview_note（wdndev 原作，无许可证）只做要点转述；meta-pe-interview-guide 为用户自有，可引用其代码中的类名 / 函数名。
 - `veeramalla-devops-interview-guide.md` 与崔亮系列同一口径：**只收录题目文本**（原文英文措辞），按原仓库的公司 / 岗位分组，不收录投稿者答案；仓库未声明许可证，作学习参考并标注出处。
 - `awesome-claude-code.md` 口径**最严**：上游榜单采用 **CC BY-NC-ND 4.0**（禁止演绎），因此本文件**不是**该榜单的副本或改编版——不收录原作者撰写的条目点评，也不复制其分类排版；只以事实方式引用项目名称与仓库地址，题目与答案要点全部由本项目原创撰写，依据为 Claude Code 官方文档、Anthropic 工程博客与各项目自身的公开 README。需要读原榜单点评请直接访问上游链接。
 - `k8s-web-archive.md` 同为提炼件：来源是网页存档 / 开源仓库文档 / 用户自有仓库与文章 / 免费电子书 / 演讲与博客，题目与要点由本项目改写，不含逐字摘录；用户自有实验集群文档只提炼做法与原理并做脱敏（不含主机名、IP、账号、凭据）；商业书籍只出主题级题目。文件头有逐份的版权口径表。
@@ -254,3 +258,33 @@
 | 十二、经典系统设计的 AWS-only 渲染（一）：短链 / IM / 票务 | 131–157 | `system-design` + `middleware` + `network` |
 | 十三、经典系统设计的 AWS-only 渲染（二）：调度 / 通知 / 爬虫 / 信息流 / 直播 / 存储 / 缓存 / 分析 | 158–195 | `system-design` + `middleware` + `sre-reliability` + `observability` |
 <!-- /aws-managed-services-only-mapping -->
+
+<!-- system-design-exercises-and-notes-mapping -->
+### 系统设计练习与笔记 → modules 映射
+
+| 本文件分组 | 题量 | 对应 modules 模块 | 备注 |
+|---|---|---|---|
+| 一、系统设计基础：单点、CDN、分层与服务拆分 | 7 | `system-design` Q1 / Q4 / Q10（消息队列）/ Q11（CDN）/ Q12（LB 与网关）；`service-mesh`；`cicd-iac`（mono vs multi-repo）；topic 文件夹 `system-design/cdn`、`system-design/message-queues`、`system-design/ecommerce-microservices` | 基础概念题，偏 SPOF 识别、Multi-CDN 调度与拆分判断；Service Mesh 题可转 `service-mesh` 模块深挖 |
+| 二、可扩展性与韧性：伸缩、高可用、容灾与零停机 | 7 | `system-design` Q4（单体演进）/ Q6（一致性哈希与分区）/ Q27（发布系统）/ Q28（容灾多活）；`sre-reliability`；`kubernetes` Q6（HPA） | Q14 与 Q4 互补，强调早期阶段触发信号；Q12 零停机与 expand/contract 可接 `cicd-iac` |
+| 三、缓存与迁移：命中率、淘汰策略与平滑迁移 | 6 | `system-design` Q7（分布式缓存）；`middleware`（Redis）；topic 文件夹 `system-design/distributed-cache`、`system-design/cache`、`system-design/distributed-lru-cache` | 避开 Q7 的雪崩 / 穿透总论，聚焦淘汰策略、集群故障与迁移计划 |
+| 四、设计题：视频、图片、短链与延伸问题 | 6 | `system-design` Q15（短链）/ Q19（视频平台）/ Q11（对象存储）/ Q23（爬虫）/ Q26（任务调度）/ Q18（通知）；topic 文件夹 `system-design/url-shortener`、`system-design/youtube`、`system-design/instagram`、`system-design/pastebin`、`system-design/web-crawler-system` | 运维视角深挖追问；Q26 为方法论题，对应评分 rubric 的可运维性维度 |
+| 五、推荐系统设计：漏斗、召回服务、特征服务与冷启动 | 9 | `system-design` Q33（推荐系统 召回 → 粗排 → 精排 → 重排）；topic `system-design/recommendation`、`video-recommendation`、`ads-recommendation-system`；`gpu-ai` Q14（向量库运维）、Q11（推理服务架构） | 本组是 Q33 的追问层：候选量级、双塔服务与更新、Bloom Filter 曝光过滤、分层实验与冷启动流量调控 |
+| 六、搜索系统设计：模块划分、索引、多路召回与排序 | 7 | `system-design` Q13（搜索与 Typeahead）、Q31（RAG 的混合检索部分）；topic `system-design/distributed-search-system`、`distributed-search`、`typeahead-box-search`、`rental-search-ranking-system` | 侧重模块拆分、项目阶段演进、索引选型与多路召回；搜索前 / 中 / 后引导可接 Typeahead 题追问 |
+| 七、对话系统与 RAG 系统设计：理解、对话管理、检索式 vs 生成式与评估 | 7 | `system-design` Q31（RAG 系统）；topic `system-design/rag-system`、`rag`、`rag-retrieval-platform`、`chatgpt-system`、`chat-app-system`；`ai-engineering` Q24（RAG / 微调 / 长上下文选型）、Q25（评测体系）；`gpu-ai` Q14 | 对话管理与 Query 理解是 Q31 之外的新知识点；RAG 题聚焦综述里的三阶段演进、检索对齐手段与评估指标 |
+| 八、Meta PE 系统设计：从教学代码到生产级监控系统 | 9 | `observability` Q1（pull 与 Pushgateway）/ Q2（四种指标类型）/ Q6（Alertmanager 分组 / 抑制 / 静默）/ Q8（告警规则设计）/ Q13（保留与降采样）/ Q20（基数爆炸）；`system-design` Q24（分布式监控系统）；topic 文件夹 `system-design/monitoring-system` | 本组是对上述模块题的「读代码 + 放大到 10 万主机」追问；Q24 做主线时用本组做深挖 |
+| 九、Meta PE「设计 + 排障」：把单机排障知识放大到全量主机 | 5 | `linux` Q3（OOM 与内存定位）/ Q14（inode 耗尽）/ Q18（进程 hang）；`network` Q7（DNS 解析与排查）/ Q15（ping 通端口不通）；`sre-reliability` Q1（排障方法论）/ Q20（Runbook）；topic 文件夹 `system-design/monitoring-system` | 单机知识点 → 全量检测、爆炸半径、诊断工具化 |
+<!-- /system-design-exercises-and-notes-mapping -->
+
+<!-- system-design-quiz-bank-mapping -->
+### 系统设计题库 → modules 映射
+
+| 本文件分组 | 题量 | 对应 modules 模块 | 备注 |
+|---|---|---|---|
+| 一、基础与方法论 | 57 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `fundamentals` 分类 | 10 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 二、基础组件 | 98 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `building-blocks` 分类 | 12 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 三、产品端到端设计 | 132 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `products` 分类 | 23 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 四、运维与基础设施 | 82 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `ops-infra` 分类 | 11 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 五、AI / ML 系统 | 57 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `ai-ml` 分类 | 9 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 六、操作系统与底层 | 16 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `os-systems` 分类 | 3 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+| 七、综合题库 | 16 | `system-design`（`system-design-questions.md` 方法论 Q1–Q4 + 对应结构化题）；主题目录见 `system-design-catalog.md` 的 `hubs` 分类 | 2 个主题；🟡 quiz · 🔴 drill · 🟢 速答 |
+<!-- /system-design-quiz-bank-mapping -->

@@ -12,7 +12,7 @@
 
 本项目由两部分组成，且**不绑定任何单一工具**：
 
-1. **知识库（basics/ + modules/ + collections/ + system-design/）**：374 道自研标准化面试题 + 6 篇基础概念深度篇 + 2200+ 道社区真实真题（22 专题 1502 题 + 崔亮高级 231 题 + 中级 89 题 + MongoDB Zero-to-Hero 68 题 + K8s 本地资料库 159 题 + 经典论文 111 题 + K8s 网页存档与本地仓库 697 题 + Veeramalla 公司真题 3024 题 + Agentic 工具链生态 392 题 + AWS 托管服务改造 195 题，标注来源，☆ 为高频题）+ **630 个系统设计主题语料**（`system-design/` 子模块，每个主题含需求 / 架构 / 权衡 / 面试问答 / 速答表）。
+1. **知识库（basics/ + modules/ + collections/ + system-design/）**：374 道自研标准化面试题 + 6 篇基础概念深度篇 + 2200+ 道社区真实真题（22 专题 1502 题 + 崔亮高级 231 题 + 中级 89 题 + MongoDB Zero-to-Hero 68 题 + K8s 本地资料库 159 题 + 经典论文 111 题 + K8s 网页存档与本地仓库 697 题 + Veeramalla 公司真题 3024 题 + Agentic 工具链生态 392 题 + AWS 托管服务改造 195 题 + 系统设计练习与笔记 63 题 + 系统设计题库 458 题，标注来源，☆ 为高频题）+ **630 个系统设计主题语料**（`system-design/` 子模块，每个主题含需求 / 架构 / 权衡 / 面试问答 / 速答表）。
 2. **面试智能体（agent/ + CLAUDE.md + AGENTS.md + workbuddy/）**：把上面的知识库变成一个「运维面试教练」Agent，  
    可在 **Claude Code、Codex、WorkBuddy、ChatGPT 等任意支持系统提示词的 LLM 工具**里运行。
 
@@ -74,7 +74,9 @@ DevOps-Engineer-Interview-Agent/
 │   ├── k8s-web-archive.md               # K8s/云原生网页存档与仓库文档 697 题（手册全章 / Gateway API / 推理网关 / Istio API / 攻防 / AI Infra / RAG / 实验集群运维，附要点）
 │   ├── veeramalla-devops-interview-guide.md  # Veeramalla DevOps/SRE 公司真题 3024 题（86 家公司 151 份写实：Amazon / JPMorgan / IBM / Infosys / TCS …，纯题目）
 │   ├── awesome-claude-code.md           # Agentic 工具链生态 392 题（扩展点选型 / 命令 / 钩子 / 技能 / 编排 / 可观测 / 成本 / 沙箱与注入防护，附要点）
-│   └── aws-managed-services-only.md     # 「只用 AWS 托管服务」改造 195 题（选型表 / IRSA 与 Secrets Manager / CloudWatch vs AMP / AWS Backup 与 K8s 对象缺口 / GPU on EKS 托管边界 / VPC Lattice / CodePipeline / 未验证设计的写法 / 11 个经典系统设计题的 AWS-only 渲染，附要点）
+│   ├── aws-managed-services-only.md     # 「只用 AWS 托管服务」改造 195 题（选型表 / IRSA 与 Secrets Manager / CloudWatch vs AMP / AWS Backup 与 K8s 对象缺口 / GPU on EKS 托管边界 / VPC Lattice / CodePipeline / 未验证设计的写法 / 11 个经典系统设计题的 AWS-only 渲染，附要点）
+│   ├── system-design-exercises-and-notes.md  # 系统设计练习与笔记 63 题（devops-exercises 系统设计主题原创题 / 推荐·搜索·对话·RAG 系统设计 / Meta PE 监控系统设计，附要点）
+│   └── system-design-quiz-bank.md  # 系统设计题库 458 题（子模块 70 个主题的专属 quiz / drill / 速答，脚本生成，剔除模板题）
 └── workbuddy/                # WorkBuddy 专家插件（可选，原生体验）
     └── ops-interview-coach/  # agent 型专家，含内置浓缩题库 + 头像
 ```
@@ -146,7 +148,7 @@ python3 <workbuddy-expert-manager>/scripts/register_expert.py \
 
 注册后，在 WorkBuddy 专家中心即可直接使用「运维面试教练」，支持内置记分卡与头像。
 
-> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **6300+ 题完整版**；  
+> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **7400+ 题完整版**；  
 > `workbuddy/` 插件内置的是 **80 题浓缩版**，便于插件离线自包含。两者口径一致。
 
 ---

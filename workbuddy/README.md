@@ -24,6 +24,8 @@ Agent 型（单个 AI 专家）
 - `references/collections-veeramalla-devops-interview-guide.md`：Veeramalla DevOps/SRE 公司真题 3024 题（86 家公司 151 份写实，按公司 / 岗位 / 年限分组，纯题目，附主题 → 模块映射）
 - `references/collections-awesome-claude-code.md`：Agentic 工具链生态 392 题（22 组：扩展点选型 → 官方心智模型 → 命令 / 钩子 / 技能 → 记忆与上下文 → 多 Agent 编排与 Ralph 循环 → 会话可观测与成本 → 沙箱与提示注入防护 → 配置治理 → IaC/K8s/OTel 技能 → 质量门与审查 → 开放判断题，附要点与分组 → 模块映射）
 - `references/collections-aws-managed-services-only.md`：「只用 AWS 托管服务」改造 195 题（13 组：约束得失 → 26 服务选型表 → IRSA 与 Secrets Manager → CloudWatch vs AMP → AWS Backup 与 K8s 对象缺口 → GPU on EKS 托管边界 → VPC Lattice → CodePipeline / Argo CD → 数据流与 AI 存储 → MCP 缺口 → 未验证架构的写法 → 11 个经典系统设计题的 AWS-only 渲染（短链 / IM / 票务 / 调度 / 通知 / 爬虫 / 信息流 / 直播 / 文件存储 / 缓存 / 分析），附要点）
+- `references/collections-system-design-exercises-and-notes.md`：系统设计练习与笔记 63 题（devops-exercises 系统设计主题原创题、推荐 / 搜索 / 对话 / RAG 系统设计、Meta PE 监控系统设计，附要点）
+- `references/collections-system-design-quiz-bank.md`：系统设计题库 458 题（system-design 子模块 70 个主题的专属 quiz / drill / 速答，脚本生成）
 
 ## 使用示例
 - 「模拟一场高级运维工程师面试，从 Linux 与系统内核开始」
