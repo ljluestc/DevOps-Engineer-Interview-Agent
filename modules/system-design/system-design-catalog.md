@@ -102,7 +102,7 @@
 | [`crawler`](../../system-design/crawler/) | Crawler | Crawler — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 352 |
 | [`data-infrastructure`](../../system-design/data-infrastructure/) | Data Infrastructure | Data Infrastructure — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 24 |
 | [`data-pipeline`](../../system-design/data-pipeline/) | Data Pipeline | Data Pipeline — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 275 |
-| [`distributed-cache`](../../system-design/distributed-cache/) | Distributed Cache | Distributed Cache — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 376 |
+| [`distributed-cache`](../../system-design/distributed-cache/) | Distributed Cache | Distributed Cache — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 386 |
 | [`distributed-cache-design`](../../system-design/distributed-cache-design/) | Distributed Cache Design | Distributed Cache Design — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 85 |
 | [`distributed-cache-educative-tests`](../../system-design/distributed-cache-educative-tests/) | Distributed Cache | Distributed Cache — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 26 |
 | [`distributed-cache-grokking`](../../system-design/distributed-cache-grokking/) | Distributed Cache Grokking | Distributed Cache Grokking — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 62 |
@@ -196,7 +196,7 @@
 | [`unique_id_generator`](../../system-design/unique_id_generator/) | Unique Id Generator | Unique Id Generator — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 180 |
 | [`url-handling`](../../system-design/url-handling/) | Url Handling | Url Handling — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 24 |
 | [`url-shorten`](../../system-design/url-shorten/) | Url Shorten | Url Shorten — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 24 |
-| [`url-shortener`](../../system-design/url-shortener/) | Url Shortener | Url Shortener — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 120 |
+| [`url-shortener`](../../system-design/url-shortener/) | Url Shortener | Url Shortener — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 122 |
 | [`url-shortener-bitly`](../../system-design/url-shortener-bitly/) | Url Shortener Bitly | Url Shortener Bitly — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 50 |
 | [`url-shortener-design`](../../system-design/url-shortener-design/) | Url Shortener Design | Url Shortener Design — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 66 |
 | [`url-shortener-educative-tests`](../../system-design/url-shortener-educative-tests/) | Url Shortener | Url Shortener — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 27 |
@@ -354,7 +354,7 @@
 | [`whatsapp-system`](../../system-design/whatsapp-system/) | Whatsapp System | Whatsapp System — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 153 |
 | [`whatsapp-system-design`](../../system-design/whatsapp-system-design/) | WhatsApp | Comprehensive system design documentation for WhatsApp. | ✓ ✓ ✓ ✓ ✓ | 28 |
 | [`whatsapp-tests`](../../system-design/whatsapp-tests/) | Whatsapp | Whatsapp — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 26 |
-| [`yelp`](../../system-design/yelp/) | Yelp | Yelp — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 26 |
+| [`yelp`](../../system-design/yelp/) | Yelp | Yelp — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 27 |
 | [`yelp-system`](../../system-design/yelp-system/) | Yelp System | Yelp System — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 197 |
 | [`youtube`](../../system-design/youtube/) | Youtube | Youtube — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 175 |
 | [`youtube-reality-is-more-complicated`](../../system-design/youtube-reality-is-more-complicated/) | Youtube Reality Is More Complicated | Youtube Reality Is More Complicated — architecture, trade-offs, and scaling considerations. | ✓ ✓ ✓ ✓ ✓ | 160 |

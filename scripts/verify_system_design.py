@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "system-design"
 CATALOG_JSON = ROOT / "modules" / "system-design" / "catalog.json"
 CATALOG_MD = ROOT / "modules" / "system-design" / "system-design-catalog.md"
+RESOLVER_JSON = ROOT / "modules" / "system-design" / "resolver.json"
+RESOLVER_MD = ROOT / "modules" / "system-design" / "system-design-resolver.md"
 QUESTIONS_MD = ROOT / "modules" / "system-design" / "system-design-questions.md"
 PROMPTS = ["CLAUDE.md", "AGENTS.md", "agent/UNIVERSAL.md"]
 CATEGORIES = {"fundamentals", "building-blocks", "products", "ops-infra", "ai-ml",
@@ -216,12 +218,112 @@ def check_modules_readme() -> tuple[bool, list[str]]:
     return True, [f"row count {count}"]
 
 
+def check_resolver() -> tuple[bool, list[str]]:
+    """Every folder folds to exactly one askable canonical topic, and no alias dangles."""
+    d: list[str] = []
+    if not RESOLVER_JSON.is_file() or not RESOLVER_MD.is_file():
+        return False, ["resolver.json / system-design-resolver.md missing — "
+                       "run scripts/build_system_design_catalog.py"]
+    res = json.loads(RESOLVER_JSON.read_text(encoding="utf-8"))
+    cat = load_catalog()
+    askable = {t["id"] for t in cat["topics"] if t["category"] != "scaffold"}
+    folders = res["folder_to_canonical"]
+    missing = sorted(askable - set(folders))
+    if missing:
+        d.append(f"{len(missing)} askable topics absent from the resolver: {missing[:5]}")
+    extra = sorted(set(folders) - askable)
+    if extra:
+        d.append(f"{len(extra)} resolver entries are not askable topics: {extra[:5]}")
+    canon = {g["canonical"] for g in res["groups"]}
+    for c in sorted(canon - askable):
+        d.append(f"canonical topic not askable: {c}")
+    for src, tgt in sorted(res["aliases"].items()):
+        if tgt not in canon:
+            d.append(f"alias {src!r} -> {tgt!r} is not a canonical topic")
+    if res["dangling_aliases"]:
+        d.append(f"{len(res['dangling_aliases'])} alias targets missing from the corpus")
+    # a resolver with no Chinese aliases would silently break Chinese-speaking candidates
+    zh = [k for k in res["aliases"] if any("\u4e00" <= c <= "\u9fff" for c in k)]
+    if len(zh) < 40:
+        d.append(f"only {len(zh)} Chinese aliases; expected the full 中文 topic-name table")
+    bad = broken_links(RESOLVER_MD)
+    if bad:
+        d.append(f"broken links in the resolver markdown: {bad[:5]}")
+    return not d, d
+
+
+def check_resolver_wired() -> tuple[bool, list[str]]:
+    d: list[str] = []
+    for rel in PROMPTS + ["modules/system-design/system-design-questions.md",
+                          "workbuddy/skills/ops-interview/SKILL.md",
+                          "workbuddy/ops-interview-coach/skills/ops-interview/SKILL.md"]:
+        if "system-design-resolver.md" not in (ROOT / rel).read_text(encoding="utf-8"):
+            d.append(f"{rel}: does not point at system-design-resolver.md")
+    return not d, d
+
+
+def check_resolver_resolves() -> tuple[bool, list[str]]:
+    """Exercise the resolver: every folder name, every alias and a set of spoken phrasings
+    must land on a canonical topic. This is the check that keeps `switch system-design <x>`
+    from silently missing."""
+    d: list[str] = []
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        import build_system_design_catalog as b
+    except Exception as e:  # noqa: BLE001
+        return False, [f"cannot import the catalog builder: {e!r}"]
+    res = json.loads(RESOLVER_JSON.read_text(encoding="utf-8"))
+    canon = {g["canonical"] for g in res["groups"]}
+    for folder, folded in sorted(res["folder_to_canonical"].items()):
+        # a curated whole-phrase alias deliberately redirects (bitly -> url-shortener), and by
+        # design it outranks the folder itself, so either answer is correct here
+        redirect = b.alias_redirect(res, folder)   # same helper the resolver uses
+        allowed = {folded} | ({redirect} if redirect else set())
+        hits = b.resolve_phrase(res, folder)
+        if not hits:
+            d.append(f"folder name does not resolve: {folder}")
+        elif hits[0]["canonical"] not in allowed:
+            d.append(f"{folder} resolved to {hits[0]['canonical']}, expected one of {sorted(allowed)}")
+    for alias, expected in sorted(res["aliases"].items()):
+        hits = b.resolve_phrase(res, alias)
+        if not hits or hits[0]["canonical"] != expected:
+            got = hits[0]["canonical"] if hits else "nothing"
+            d.append(f"alias {alias!r} resolved to {got}, expected {expected}")
+    # spoken phrasings, English and Chinese, the way candidates actually ask
+    spoken = {
+        "design a TinyURL system": "url-shortener",
+        "design WhatsApp": "whatsapp",
+        "how would you build an autocomplete": "typeahead",
+        "design a rate limiter please": "rate-limiter",
+        "设计一个秒杀系统": "ticketmaster",
+        "我想练一下短链接": "url-shortener",
+        "请出一道限流的题": "rate-limiter",
+        "设计朋友圈信息流": "newsfeed",
+        "帮我面一下分布式锁": "distributed-locking",
+        "设计一个网盘": "file-storage-service",
+    }
+    for phrase, expected in spoken.items():
+        hits = b.resolve_phrase(res, phrase)
+        if not hits or hits[0]["canonical"] != expected:
+            got = hits[0]["canonical"] if hits else "nothing"
+            d.append(f"{phrase!r} resolved to {got}, expected {expected}")
+    if len(d) > 12:
+        d = d[:12] + [f"... {len(d)} failures total"]
+    unreachable = canon - {res["folder_to_canonical"].get(c, c) for c in canon}
+    if unreachable:
+        d.append(f"canonical topics unreachable by their own name: {sorted(unreachable)[:5]}")
+    return not d, d
+
+
 CHECKS = [
     ("submodule present", check_submodule),
     ("catalog fresh", check_catalog_fresh),
     ("catalog coverage", check_catalog_coverage),
     ("catalog integrity", check_catalog_integrity),
     ("catalog markdown links", check_catalog_md),
+    ("topic resolver", check_resolver),
+    ("resolver wired into prompts", check_resolver_wired),
+    ("resolver resolves every name", check_resolver_resolves),
     ("questions module", check_questions),
     ("agent prompts wired", check_prompts_wired),
     ("prompt consistency", check_prompt_consistency),

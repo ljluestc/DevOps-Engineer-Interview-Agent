@@ -12,7 +12,7 @@
 
 本项目由两部分组成，且**不绑定任何单一工具**：
 
-1. **知识库（basics/ + modules/ + collections/ + system-design/）**：374 道自研标准化面试题 + 6 篇基础概念深度篇 + 2200+ 道社区真实真题（22 专题 1502 题 + 崔亮高级 231 题 + 中级 89 题 + MongoDB Zero-to-Hero 68 题 + K8s 本地资料库 159 题 + 经典论文 111 题，标注来源，☆ 为高频题）+ **630 个系统设计主题语料**（`system-design/` 子模块，每个主题含需求 / 架构 / 权衡 / 面试问答 / 速答表）。
+1. **知识库（basics/ + modules/ + collections/ + system-design/）**：374 道自研标准化面试题 + 6 篇基础概念深度篇 + 2200+ 道社区真实真题（22 专题 1502 题 + 崔亮高级 231 题 + 中级 89 题 + MongoDB Zero-to-Hero 68 题 + K8s 本地资料库 159 题 + 经典论文 111 题 + K8s 网页存档与本地仓库 697 题 + Veeramalla 公司真题 3024 题 + Agentic 工具链生态 392 题 + AWS 托管服务改造 195 题，标注来源，☆ 为高频题）+ **630 个系统设计主题语料**（`system-design/` 子模块，每个主题含需求 / 架构 / 权衡 / 面试问答 / 速答表）。
 2. **面试智能体（agent/ + CLAUDE.md + AGENTS.md + workbuddy/）**：把上面的知识库变成一个「运维面试教练」Agent，  
    可在 **Claude Code、Codex、WorkBuddy、ChatGPT 等任意支持系统提示词的 LLM 工具**里运行。
 
@@ -57,11 +57,11 @@ DevOps-Engineer-Interview-Agent/
 │   ├── linux / network / kubernetes / cicd-iac
 │   ├── observability / sre-reliability / middleware
 │   ├── gpu-ai / cloud-security / service-mesh / behavior
-│   ├── system-design/        # 35 题 + system-design-catalog.md（630 主题自动目录）
+│   ├── system-design/        # 35 题 + system-design-catalog.md（630 主题自动目录）+ system-design-resolver.md（181 条别名含 78 条中文 / 82 组重复主题折叠 / 薄主题与非标准编号主题分流）
 │   ├── fde/                  # 30 题：前沿部署工程师（案例面试 + C.A.S.E. + 隔离网络部署）
 │   └── ai-engineering/       # 27 题：AI 面试（Claude Code 等 agentic 工具、护栏、MCP、评测、注入）
 ├── system-design/            # git 子模块：github.com/ljluestc/system-design（630 个系统设计主题）
-├── scripts/                  # build_system_design_catalog.py（生成目录）/ verify_system_design.py（校验）
+├── scripts/                  # build_system_design_catalog.py（生成目录 + 解析器；`--resolve "设计一个秒杀系统"` 可直接查主题）/ verify_system_design.py（12 项校验）
 ├── .mcp.json                 # 7 个 MCP 服务器（arXiv / 网页搜索 / 抓取 / K8s 只读 / Docker / Terraform / Context7），Claude Code 自动加载
 ├── collections/              # 收录的社区真实真题（来源标注见 README）
 │   ├── README.md             # 收录清单 / 版权口径 / 模块映射
@@ -70,7 +70,11 @@ DevOps-Engineer-Interview-Agent/
 │   ├── cuiliang-mid-ops-interview-2020.md  # 崔亮 89 题中级
 │   ├── mongodb-zero-to-hero.md          # MongoDB 68 题（教程提炼，附要点）
 │   ├── k8s-local-library.md             # K8s 本地资料库 159 题（CKS / 官方安全审计 / 大厂实践 / 存储 / 排障，附要点）
-│   └── classic-papers.md                # 经典论文 111 题（Paxos / Raft / GFS / MapReduce / Lamport / HTTP/2 / REST / JVM GC，附要点 + 书架索引）
+│   ├── classic-papers.md                # 经典论文 111 题（Paxos / Raft / GFS / MapReduce / Lamport / HTTP/2 / REST / JVM GC，附要点 + 书架索引）
+│   ├── k8s-web-archive.md               # K8s/云原生网页存档与仓库文档 697 题（手册全章 / Gateway API / 推理网关 / Istio API / 攻防 / AI Infra / RAG / 实验集群运维，附要点）
+│   ├── veeramalla-devops-interview-guide.md  # Veeramalla DevOps/SRE 公司真题 3024 题（86 家公司 151 份写实：Amazon / JPMorgan / IBM / Infosys / TCS …，纯题目）
+│   ├── awesome-claude-code.md           # Agentic 工具链生态 392 题（扩展点选型 / 命令 / 钩子 / 技能 / 编排 / 可观测 / 成本 / 沙箱与注入防护，附要点）
+│   └── aws-managed-services-only.md     # 「只用 AWS 托管服务」改造 195 题（选型表 / IRSA 与 Secrets Manager / CloudWatch vs AMP / AWS Backup 与 K8s 对象缺口 / GPU on EKS 托管边界 / VPC Lattice / CodePipeline / 未验证设计的写法 / 11 个经典系统设计题的 AWS-only 渲染，附要点）
 └── workbuddy/                # WorkBuddy 专家插件（可选，原生体验）
     └── ops-interview-coach/  # agent 型专家，含内置浓缩题库 + 头像
 ```
@@ -142,7 +146,7 @@ python3 <workbuddy-expert-manager>/scripts/register_expert.py \
 
 注册后，在 WorkBuddy 专家中心即可直接使用「运维面试教练」，支持内置记分卡与头像。
 
-> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **2600+ 题完整版**；  
+> 注：方式一~三使用的是本仓库 `basics/` + `modules/` + `collections/` 的 **6300+ 题完整版**；  
 > `workbuddy/` 插件内置的是 **80 题浓缩版**，便于插件离线自包含。两者口径一致。
 
 ---

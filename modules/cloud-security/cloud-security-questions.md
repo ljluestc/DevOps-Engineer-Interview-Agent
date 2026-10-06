@@ -1,6 +1,7 @@
 # 云 / 安全 / 合规面试题（17 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。
+> **AWS 托管服务选型补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md)（130 题）——IRSA / Pod Identity / Secrets Manager（Pod 自己读 vs External Secrets / CSI）、26 服务目标架构的 chosen/rejected 选型表、MCP/Agent 在 AWS 上的控制缺口。
 
 ---
 

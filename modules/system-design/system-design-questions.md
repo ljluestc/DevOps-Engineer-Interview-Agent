@@ -1,6 +1,8 @@
 # 系统设计面试题（35 题）
 
 > 遵循 [../../docs/STANDARD.md](../../docs/STANDARD.md) 模板。难度：🟢 初级 · 🟡 中级 · 🔴 高级。
+> **主题解析**：候选人说的名字（品牌名 / 中文 / 错别字 / 同题多拼法）先查 [system-design-resolver.md](system-design-resolver.md)（181 条别名 · 82 组重复主题 · 2 个真薄主题 + 21 个非标准编号主题），再查 [system-design-catalog.md](system-design-catalog.md)；都不中时用本文件 Q1–Q4 的方法论开面，并明确说明语料里没有该主题。
+> **AWS-only 渲染补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md) 第 131–195 题——把 11 个经典题（短链 / IM / 票务 / 定时任务 / 通知 / 爬虫 / 信息流 / 直播 / 文件存储 / 分布式缓存 / Web 分析）逐行翻成 AWS 托管服务，考「通用设计里哪些组件消失了、剩下的那部分才是要设计的东西」。适合在候选人画完通用架构后追问。
 > 本模块是 `switch system-design` 的**主题库与评分口径**；具体主题的深度素材来自
 > [`system-design/`](../../system-design/) 子模块（<https://github.com/ljluestc/system-design>，600+ 主题），
 > 全量主题目录见 [system-design-catalog.md](system-design-catalog.md)（自动生成）。
@@ -219,7 +221,7 @@
   - 「先删缓存再写库」或「写库后更新缓存」——并发下都会脏。
   - 把 Redis 当成强一致存储；不知道 Redis 主从异步复制会丢写。
   - 说不出命中率目标与「缓存丢了 DB 能不能扛」。
-- **延伸**：Q5、Q6、[system-design/distributed-cache/](../../system-design/distributed-cache/)、[system-design/distributed-cache-design/](../../system-design/distributed-cache-design/)、[system-design/caching/](../../system-design/caching/)、[middleware/middleware-questions.md](../middleware/middleware-questions.md)
+- **延伸**：Q5、Q6、[collections/k8s-web-archive.md 第 686–697 题](../../collections/k8s-web-archive.md)（HelloInterview 分布式缓存拆解速答）、[system-design/distributed-cache/answer-suites/](../../system-design/distributed-cache/answer-suites/README.md)（逐阶段 60 秒口述答案 + 数字推导 + 计时演练，来自一场 7.6/10 的模拟面试复盘；面试中不要直接给候选人看）、[system-design/distributed-cache/](../../system-design/distributed-cache/)、[system-design/distributed-cache-design/](../../system-design/distributed-cache-design/)、[system-design/caching/](../../system-design/caching/)、[middleware/middleware-questions.md](../middleware/middleware-questions.md)
 
 ---
 
@@ -428,7 +430,7 @@
   - 用自增 ID 直接 base62（可枚举全部短链）；或多写实例各自计数导致重号。
   - 分不清 301/302 对统计与可更新性的影响；过期不返回 410。
   - 同步写点击计数拖慢跳转；缓存 TTL 长于过期时间。
-- **延伸**：Q7、Q8、[system-design/url-shortener/](../../system-design/url-shortener/)、[system-design/tinyurl-system/](../../system-design/tinyurl-system/)、[system-design/pastebin/](../../system-design/pastebin/)、[system-design/14-bitly.md](../../system-design/14-bitly.md)、来源：[Hello Interview — Bitly problem breakdown](https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly)（Evan King，2026-02）
+- **延伸**：Q7、Q8、[system-design/url-shortener/](../../system-design/url-shortener/)、[system-design/url-shortener/22-bitly-full-design.md](../../system-design/url-shortener/22-bitly-full-design.md)（逐阶段口述答案 + 推导 + 速答卡，基于 HelloInterview Bitly 拆解并补 SRE 视角；面试中不要直接给候选人看）、[system-design/tinyurl-system/](../../system-design/tinyurl-system/)、[system-design/pastebin/](../../system-design/pastebin/)、[system-design/14-bitly.md](../../system-design/14-bitly.md)、来源：[Hello Interview — Bitly problem breakdown](https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly)（Evan King，2026-02）
 
 ---
 
@@ -556,7 +558,7 @@
   - 位置直接写关系库；附近查询用 `WHERE lat BETWEEN ...` 全表扫。
   - 不知道 geohash 边界问题与邻居格。
   - 匹配逐单贪心、没有防双派；状态机没有卡单补偿。
-- **延伸**：Q9、Q13、[system-design/uber/](../../system-design/uber/)、[system-design/google-maps/](../../system-design/google-maps/)、[system-design/doordash/](../../system-design/doordash/)、[system-design/food-delivery/](../../system-design/food-delivery/)、[system-design/yelp/](../../system-design/yelp/)
+- **延伸**：Q9、Q13、[system-design/uber/](../../system-design/uber/)、[system-design/yelp/23-yelp-full-design.md](../../system-design/yelp/23-yelp-full-design.md)（附近搜索的静态版：地理索引 + 倒排索引 + 评分聚合 + 社区多边形，逐阶段口述答案与速答卡；面试中不要直接给候选人看）、[system-design/google-maps/](../../system-design/google-maps/)、[system-design/doordash/](../../system-design/doordash/)、[system-design/food-delivery/](../../system-design/food-delivery/)、[system-design/yelp/](../../system-design/yelp/)
 
 ---
 
@@ -968,5 +970,5 @@
 
 - 主题语料：[`system-design/`](../../system-design/) 子模块（<https://github.com/ljluestc/system-design>），每个主题目录含 `00-index`（题面）、`01-requirements`、`02-architecture`、`05-trade-offs`、`06-quiz`（折叠答案）、`20-interview-drills`（速答 + 陷阱）等标准文档；全量目录见 [system-design-catalog.md](system-design-catalog.md)。
 - 面试方法论：[system-design/interview-quick-reference.md](../../system-design/interview-quick-reference.md)、[system-design/system-design-primer-guide.md](../../system-design/system-design-primer-guide.md)、[system-design/8-week-system-design-roadmap.md](../../system-design/8-week-system-design-roadmap.md)。
-- Hello Interview 问题拆解（[Bitly](https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly)、[Dropbox](https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox)，Evan King）：Q15、Q35 的「按级别的期望」与深挖顺序参考其框架；本仓库只做**提炼与转述**，不收录原文。本地存档见 `~/dev/k8s/slurps/hellointerview-learn-system-design-problem-breakdowns-*.md`。
+- Hello Interview 问题拆解（[Bitly](https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly)、[Dropbox](https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox)、[Distributed Cache](https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-cache)，Evan King）：Q15、Q35 的「按级别的期望」与深挖顺序参考其框架；Q7 的追问可接 [collections/k8s-web-archive.md](../../collections/k8s-web-archive.md) 第 686–697 题（分布式缓存六个深挖的速答卡）；本仓库只做**提炼与转述**，不收录原文。本地存档见 `~/dev/k8s/slurps/hellointerview-learn-system-design-problem-breakdowns-*.md`。
 - 本模块参考答案为自研整理，术语与结论以各主题目录下的一手文档与官方资料为准。

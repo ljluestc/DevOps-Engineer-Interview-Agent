@@ -3285,8 +3285,8 @@
    "title": "Distributed Cache",
    "summary": "Distributed Cache — architecture, trade-offs, and scaling considerations.",
    "category": "building-blocks",
-   "files": 376,
-   "md_files": 326,
+   "files": 386,
+   "md_files": 336,
    "docs": {
     "index": true,
     "requirements": true,
@@ -12943,8 +12943,8 @@
    "title": "Url Shortener",
    "summary": "Url Shortener — architecture, trade-offs, and scaling considerations.",
    "category": "building-blocks",
-   "files": 120,
-   "md_files": 105,
+   "files": 122,
+   "md_files": 107,
    "docs": {
     "index": true,
     "requirements": true,
@@ -13669,8 +13669,8 @@
    "title": "Yelp",
    "summary": "Yelp — architecture, trade-offs, and scaling considerations.",
    "category": "products",
-   "files": 26,
-   "md_files": 26,
+   "files": 27,
+   "md_files": 27,
    "docs": {
     "index": true,
     "requirements": true,

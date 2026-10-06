@@ -1,6 +1,7 @@
 # GPU / AI 运维面试题（26 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。基础概念见 [../../basics/06-ai-gpu-basics.md](../../basics/06-ai-gpu-basics.md)。
+> **AWS 上的 GPU 托管边界补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md) 第 64–76 题——加速 AMI 与 GPU Operator 的两个开关、CloudWatch agent 不发布的 DCGM profiling 指标、gang scheduling 缺口与 SageMaker HyperPod、AI 存储（FSx for Lustre / Mountpoint for S3 / 异步 checkpoint）。
 
 ---
 

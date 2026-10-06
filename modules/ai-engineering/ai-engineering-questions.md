@@ -579,4 +579,5 @@
 - [collections/ops-question-bank-1502.md](../../collections/ops-question-bank-1502.md) VIBE-CODING 29 题：Q13–Q26 的判断题源自其中的真实面试问法，本模块给出参考答案。
 - 相关模块：[gpu-ai](../gpu-ai/gpu-ai-questions.md)（GPU 与推理基础设施）、[fde](../fde/fde-questions.md)（客户现场 AI 交付与评测）、[system-design](../system-design/system-design-questions.md) Q31–Q34（RAG / LLM 推理 / 推荐 / Agent 平台设计）、[behavior](../behavior/behavior-questions.md) Q8（AI 进运维链路的护栏）。
 - [duanyytop/ai-market-radar](https://github.com/duanyytop/ai-market-radar)（MIT）：Q27 的案例——定时 LLM 报告流水线的降级 / 兜底 / 供应商抽象 / 配置校验，读的是 README 与 `src/` 源码。
+- [collections/awesome-claude-code.md](../../collections/awesome-claude-code.md)（392 题）：本模块的**生态与工程化补充**——扩展点准入尽调、命令 / 钩子 / 技能的编写与治理、多 Agent 编排与 Ralph 循环、会话可观测与成本治理、沙箱与提示注入防护、配置 lint 与规则漂移、以及 16 道 🔴 开放判断题。模块讲**机制**，该文件讲**面对几百个项目的生态怎么选、怎么治、怎么度量**，可交叉出题。
 - 本模块为提炼与转述，不收录原文。

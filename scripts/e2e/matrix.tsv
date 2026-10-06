@@ -33,3 +33,27 @@ mcp_c7	sonnet	Using context7, look up the Helm docs and tell me the difference b
 mcp_search	sonnet	Use the fetch tool to read https://kubernetes.io/blog/2025/09/01/kubernetes-v1-34-dra-updates/ and summarize the DRA changes in 4 bullets.
 mcp_docker	sonnet	Using the docker tools, list the running containers on this host. Do not create or remove anything.
 ai_eng	sonnet	switch ai-engineering. I am a senior SRE candidate. Start the interview: ask me the first question.
+k8s_web_gateway	sonnet	switch kubernetes. Senior candidate. Ask me ONE Gateway API follow-up question taken from collections/k8s-web-archive.md (the Gateway API groups) and say which group it comes from.
+sec_kubehound	sonnet	switch cloud-security. Senior candidate. Ask me ONE question about Kubernetes attack paths (KubeHound) drawn from collections/k8s-web-archive.md.
+mesh_istio_api	sonnet	switch service-mesh. Senior candidate. Ask me ONE DestinationRule / EnvoyFilter field-level question drawn from collections/k8s-web-archive.md.
+quiz_instagram_zh	sonnet	quiz system-design instagram。我是中级候选人，开始速答，一次一题。
+homelab_dr_zh	sonnet	switch sre-reliability。我是中级候选人，请从 collections/k8s-web-archive.md 的「实验集群运维」分组里出一道备份与恢复场景题。
+veeramalla_amazon	sonnet	I'm interviewing at Amazon for a DevOps consultant role, 7 years of experience. Run a same-company mock using collections/veeramalla-devops-interview-guide.md: ask me the first question and say which write-up it comes from.
+rag_crash	sonnet	switch ai-engineering. Senior candidate. Ask me ONE question about chunking or retrieval taken from the RAG groups of collections/k8s-web-archive.md, and name the group.
+infer_gateway	sonnet	switch gpu-ai. Staff-level candidate. Ask me ONE deep question about the Gateway API Inference Extension scheduler or prefix-cache-aware routing from collections/k8s-web-archive.md.
+sec_rbacpolice	sonnet	switch cloud-security. Senior candidate. Ask me ONE question about RBAC privilege-escalation scanning (rbac-police) or the classic Kubernetes CVE families, drawn from collections/k8s-web-archive.md.
+quiz_flashsale_zh	sonnet	quiz system-design ticketmaster。我是高级候选人，从 collections/k8s-web-archive.md 的「秒杀与票务」速答组出题，一次一题。
+mcp_protocol	sonnet	switch ai-engineering. Ask me ONE question about the MCP protocol surface (tools vs resources vs prompts, sampling, transports) drawn from collections/k8s-web-archive.md.
+es_ops	sonnet	switch middleware. Mid-level candidate. Ask me ONE Elasticsearch operations question drawn from collections/k8s-web-archive.md.
+acc_extension_choice	sonnet	switch ai-engineering. Senior candidate. Ask me ONE question about choosing between CLAUDE.md, skills, subagents and hooks for the same requirement, drawn from collections/awesome-claude-code.md.
+acc_hook_guardrail	sonnet	switch cloud-security. Staff-level candidate. Ask me ONE question about sandboxing an autonomous coding agent or defending against prompt injection, drawn from collections/awesome-claude-code.md.
+acc_cost_zh	sonnet	switch observability。我是中级候选人，请从 collections/awesome-claude-code.md 的「用量、成本与速率限制」组出一道题，一次一题。
+aws_managed_backup	sonnet	switch sre-reliability. Staff-level candidate. Ask me ONE question about designing backup and restore on EKS using only AWS-managed services, and the gap that no AWS service backs up Kubernetes API objects, drawn from collections/aws-managed-services-only.md.
+aws_managed_obs	sonnet	switch observability. Senior candidate. Ask me ONE question about choosing CloudWatch over Amazon Managed Prometheus and what that choice costs an SLO, drawn from collections/aws-managed-services-only.md.
+aws_managed_gpu_zh	sonnet	switch gpu-ai。我是高级候选人，请从 collections/aws-managed-services-only.md 的「GPU on EKS 托管边界」组出一道题（托管服务在哪一层断掉、DCGM 与 CloudWatch agent 的差别），一次一题。
+aws_sd_ticketing	sonnet	switch system-design ticketmaster. Staff-level candidate. Run it AWS-managed-services-only: ask me ONE question about the seat-hold race condition or how holds expire, drawn from collections/aws-managed-services-only.md.
+aws_sd_shortener_zh	sonnet	switch system-design url-shortener。我是中级候选人，请按「只用 AWS 托管服务」的约束出一道题（读路径为什么在 CDN、301/302 的成本取舍、或发号如何避开热分区），一次一题，用中文。
+sd_resolve_typo	sonnet	switch system-design chatpgt. I'm a mid-level candidate. Resolve the topic name first (it is misspelled in the corpus), tell me which canonical topic you landed on, then ask the first question.
+sd_resolve_zh	sonnet	设计一个秒杀系统。我是高级候选人，请先说明你把这个中文题名解析到了哪个主题目录，然后开始面试，一次一个问题。
+sd_resolve_thin	sonnet	switch system-design airtag. I'm a senior candidate. If the corpus documentation for this topic is thin, say so plainly and tell me how you will run the round anyway, then ask the first question.
+quiz_distcache_zh	sonnet	switch system-design distributed-cache。我是高级 SRE 候选人，请从 collections/k8s-web-archive.md 的「HelloInterview 分布式缓存拆解」分组出一道深挖题（热 key、一致性哈希或高可用），一次一题，并说明出自哪一组。

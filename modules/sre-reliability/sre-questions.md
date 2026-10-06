@@ -1,6 +1,7 @@
 # 故障排查 / 高可用 / 容量 / SRE 面试题（29 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。
+> **AWS 托管服务下的 SRE 补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md) 第 39–42、51–63 题——SLO 的可测量性（没有直方图时延迟 SLO 变成什么）、双窗口 burn-rate 与错误预算策略、AWS Backup + 恢复演练计划 + Audit Manager、以及「AWS 没有服务备份 K8s API 对象」这个被诚实命名的缺口（git 漂移检查 vs Velero）。
 
 ---
 

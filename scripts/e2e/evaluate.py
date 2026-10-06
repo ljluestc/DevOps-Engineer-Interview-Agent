@@ -44,8 +44,32 @@ EXPECT = {  # name -> substring expected among read paths (topic folder), or Non
     "fde_case": "modules/fde/fde-questions.md",
     "fde_zh": "modules/fde/fde-questions.md",                    # 短链服务 -> url-shortener*/tinyurl*
     "rate_limiter": "system-design/rate-limiter/",
+    "k8s_web_gateway": "collections/k8s-web-archive.md",   # collection-backed rounds (added 2026-09-20)
+    "sec_kubehound": "collections/k8s-web-archive.md",
+    "mesh_istio_api": "collections/k8s-web-archive.md",
+    "quiz_instagram_zh": "instagram",                       # system-design/instagram* or the collection's Instagram group
+    "homelab_dr_zh": "collections/k8s-web-archive.md",
+    "veeramalla_amazon": "collections/veeramalla-devops-interview-guide.md",
+    "rag_crash": "collections/k8s-web-archive.md",
+    "infer_gateway": "collections/k8s-web-archive.md",
+    "sec_rbacpolice": "collections/k8s-web-archive.md",
+    "quiz_flashsale_zh": "collections/k8s-web-archive.md",
+    "mcp_protocol": "collections/k8s-web-archive.md",
+    "es_ops": "collections/k8s-web-archive.md",
+    "quiz_distcache_zh": "collections/k8s-web-archive.md",  # HelloInterview distributed-cache group (2026-10-03)
+    "acc_extension_choice": "collections/awesome-claude-code.md",   # awesome-claude-code ecosystem rounds (added 2026-09-21)
+    "acc_hook_guardrail": "collections/awesome-claude-code.md",
+    "acc_cost_zh": "collections/awesome-claude-code.md",
+    "aws_managed_backup": "collections/aws-managed-services-only.md",   # AWS-only migration rounds (added 2026-09-26)
+    "aws_managed_obs": "collections/aws-managed-services-only.md",
+    "aws_managed_gpu_zh": "collections/aws-managed-services-only.md",
+    "aws_sd_ticketing": "collections/aws-managed-services-only.md",
+    "aws_sd_shortener_zh": "collections/aws-managed-services-only.md",
+    "sd_resolve_typo": "system-design/chatgpt/",          # resolver rounds (added 2026-09-26)
+    "sd_resolve_zh": "system-design/ticketmaster/",
+    "sd_resolve_thin": "modules/system-design/system-design-resolver.md",
 }
-ZH = {"ops_monitoring_zh", "zh_named", "fde_zh"}
+ZH = {"ops_monitoring_zh", "zh_named", "fde_zh", "quiz_instagram_zh", "homelab_dr_zh", "quiz_flashsale_zh", "aws_managed_gpu_zh", "aws_sd_shortener_zh", "sd_resolve_zh"}
 NO_QUESTION_OK = {"explain_hashing", "arxiv_attention", "mcp_tf", "mcp_c7", "mcp_search", "mcp_docker"}
 
 
@@ -77,7 +101,7 @@ rows, failures = [], 0
 for name in sorted(n for n in EXPECT if (E2E / f"{n}.jsonl").exists() or (E2E / f"{n}.err").exists()):
     exit_ok, reads, texts, final, turns, err = load(name)
     joined = "\n".join(reads)
-    corpus_reads = [r for r in reads if "system-design/" in r or "modules/fde/" in r or "modules/ai-engineering/" in r or "mcp__" in r]
+    corpus_reads = [r for r in reads if "system-design/" in r or "modules/" in r or "collections/" in r or "mcp__" in r]
     exp = EXPECT[name]
     topic_ok = True if exp is None else (exp in joined)
     catalog_ok = CATALOG in joined or "system-design-questions.md" in joined

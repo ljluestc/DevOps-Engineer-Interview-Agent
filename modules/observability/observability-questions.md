@@ -1,6 +1,7 @@
 # 监控 / 可观测性面试题（23 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。
+> **AWS 托管可观测性补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md) 第 35–50 题——CloudWatch vs AMP + Managed Grafana vs 自建 kube-prometheus-stack：没有直方图与标签选择器对 SLO 的影响、按自定义指标计费与基数治理、告警从 Alertmanager 迁到 SNS 丢掉的分组 / 抑制 / 静默。
 
 ---
 

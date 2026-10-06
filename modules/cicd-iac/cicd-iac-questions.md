@@ -1,6 +1,7 @@
 # CI/CD & IaC 面试题（25 题）
 
 > 模板见 [../../docs/STANDARD.md](../../docs/STANDARD.md)。Ansible 基础见 [../../basics/05-ansible-basics.md](../../basics/05-ansible-basics.md)；Docker 见 [../../basics/03-docker-basics.md](../../basics/03-docker-basics.md)。
+> **AWS 交付链补充**：[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md) 第 88–98 题——CodePipeline + CodeBuild vs GitHub Actions / GitLab / Jenkins、EKS 托管 Argo CD capability、push vs pull 与「谁持有集群凭据」、流水线凭据与发布门禁。
 
 ---
 

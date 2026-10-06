@@ -11,7 +11,10 @@ Every non-hidden, non-empty top-level directory of the submodule is assigned to 
 category so that the agent can serve *all* topics, not just the famous ones.
 
 Usage:  python3 scripts/build_system_design_catalog.py [--check]
-        --check  : do not write, exit 1 if the generated output differs from what is on disk
+        python3 scripts/build_system_design_catalog.py --resolve "<what the candidate said>"
+        --check    : do not write, exit 1 if the generated output differs from what is on disk
+        --resolve  : print the canonical topic for a spoken request (brand name, Chinese, typo,
+                     or any of the duplicate spellings) — the same order the agent follows
 """
 from __future__ import annotations
 
@@ -24,6 +27,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "system-design"
 OUT_MD = ROOT / "modules" / "system-design" / "system-design-catalog.md"
 OUT_JSON = ROOT / "modules" / "system-design" / "catalog.json"
+OUT_RES_MD = ROOT / "modules" / "system-design" / "system-design-resolver.md"
+OUT_RES_JSON = ROOT / "modules" / "system-design" / "resolver.json"
 
 # Standard hub documents (numbered layout used throughout the corpus).
 HUB_DOCS = {
@@ -297,24 +302,389 @@ def render_md(cat: dict) -> str:
     return "\n".join(out) + "\n"
 
 
+# --------------------------------------------------------------------------------------
+# Topic resolver: fold near-duplicate folders, and map what a candidate actually says
+# (typos, brand names, Chinese terms, "design X" phrasings) onto a canonical topic.
+# The corpus grew organically, so the same topic exists under up to eight spellings
+# (url-shortener / url_shortener / url-shortening / url-shorten / tinyurl / bitly-...)
+# and a few folders are outright typos (chatpgt, typehead, kuberentes, new-aggregator).
+# Without this, `switch system-design <whatever the candidate said>` misses.
+# --------------------------------------------------------------------------------------
+
+# Whole tokens dropped before comparing two folder names.
+NOISE_TOKENS = {
+    "system", "systems", "design", "designs", "test", "tests", "educative", "grokking",
+    "complete", "hub", "hubs", "detailed", "prototype", "demo", "v2", "guide",
+}
+# Variant stems folded together (applied per token, longest pattern first).
+STEM_MAP = {
+    "shortening": "shorten", "shortener": "shorten", "shorteners": "shorten",
+    "crawlers": "crawler", "webcrawler": "webcrawler", "webcrawlers": "webcrawler",
+    "monitoring": "monitor", "logging": "log", "logs": "log",
+    "scheduling": "schedule", "scheduler": "schedule",
+    "recommendation": "recommend", "recommendations": "recommend", "recommender": "recommend",
+    "messaging": "message", "messages": "message", "queues": "queue",
+    "typehead": "typeahead",  # corpus typo
+    "chatpgt": "chatgpt",     # corpus typo
+    "kuberentes": "kubernetes",  # corpus typo
+    "newsfeed": "newsfeed", "new": "news",  # new-aggregator -> news-aggregator
+    "aggregator": "aggregator", "aggregators": "aggregator",
+    "notification": "notification", "notifications": "notification",
+    "analytic": "analytics",
+}
+
+def norm_key(name: str) -> str:
+    """Normalised comparison key for a folder name."""
+    toks = [t for t in re.split(r"[-_\s.]+", name.lower()) if t]
+    out = []
+    for t in toks:
+        t = STEM_MAP.get(t, t)
+        if t in NOISE_TOKENS:
+            continue
+        out.append(t)
+    return "".join(out) or name.lower()
+
+
+def doc_score(t: dict) -> int:
+    return sum(1 for v in t["docs"].values() if v)
+
+
+def noise_penalty(name: str) -> int:
+    """How far a folder name is from the plain name a candidate would say.
+
+    At equal documentation completeness we want `blob-store`, not
+    `blob-store-educative-tests`, and `dns`, not `dns_system`.
+    """
+    toks = [t for t in re.split(r"[-_\s.]+", name.lower()) if t]
+    return sum(1 for t in toks if t in NOISE_TOKENS) + ("_" in name)
+
+
+# Curated aliases: what a candidate says -> a folder id that must exist in the corpus.
+# Keys are matched case-insensitively after the same normalisation as folder names, so
+# "Design TinyURL!" and "tinyurl" both hit the "tinyurl" entry.
+CURATED_ALIASES: dict[str, str] = {
+    # brand / product phrasings
+    "tinyurl": "url-shortener", "bitly": "url-shortener", "shorturl": "url-shortener",
+    "pastebin": "pastebin", "dropbox": "dropbox", "googledrive": "file-storage-service",
+    "onedrive": "file-storage-service", "whatsapp": "whatsapp", "messenger": "facebook-messenger-system",
+    "facebookmessenger": "facebook-messenger-system", "slack": "messaging-system",
+    "discord": "messaging-system", "telegram": "messaging-system",
+    "twitter": "twitter", "x": "twitter", "facebook": "fb-news-feed", "instagram": "instagram",
+    "tiktok": "tiktok", "douyin": "tiktok", "youtube": "youtube", "netflix": "video-streaming",
+    "twitch": "twitch", "spotify": "spotify", "uber": "uber", "lyft": "uber", "didi": "uber",
+    "doordash": "doordash", "ubereats": "uber-eats", "meituan": "food-delivery",
+    "airbnb": "rental-search-ranking", "booking": "hotel-booking-system", "yelp": "yelp",
+    "googlemaps": "google-maps", "maps": "google-maps", "googledocs": "google-docs",
+    "notion": "google-docs", "figma": "google-docs", "ticketmaster": "ticketmaster",
+    "stripe": "payment", "paypal": "payment", "venmo": "payment", "robinhood": "robinhood",
+    "leetcode": "leetcode-online-judge", "quora": "quora", "reddit": "newsfeed",
+    "craigslist": "craigslist-system", "linkedin": "linkedin-feed-ranking",
+    "strava": "strava", "tinder": "tinder", "chatgpt": "chatgpt", "gmail": "email-service",
+    "zoom": "live-streaming-platform", "airtag": "airtag", "alexa": "alexa",
+    # building blocks by the words interviewers use
+    "ratelimiter": "rate-limiter", "throttling": "rate-limiter",
+    "idgenerator": "unique-id-generator", "snowflake": "unique-id-generator",
+    "sequencer": "unique-id-generator", "autocomplete": "typeahead",
+    "searchsuggestion": "typeahead", "searchautocomplete": "typeahead",
+    "kvstore": "key-value-store", "keyvaluestore": "key-value-store",
+    "objectstore": "object-storage", "blobstore": "blob-store", "s3": "s3-like-storage",
+    "messagequeue": "distributed-message-queue", "kafka": "distributed-message-queue",
+    "pubsub": "pubsub", "cdn": "cdn", "loadbalancer": "load-balancer", "dns": "dns",
+    "webcrawler": "web-crawler-system", "searchengine": "distributed-search",
+    "metrics": "metrics-monitoring-hello-interview", "monitor": "monitoring-system",
+    "logsearch": "distributed-logging", "tracing": "observability",
+    "leaderboard": "dream11-leaderboard", "topk": "topk", "trending": "trending-topic-system",
+    "adclick": "ad-click-aggregator", "adsclick": "ad-click-aggregator",
+    "distributedlock": "distributed-locking", "cronjob": "distributed-job-scheduler",
+    "taskscheduler": "distributed-job-scheduler", "jobscheduler": "distributed-job-scheduler",
+    "sessionstore": "session-management-system", "featureflag": "app",
+    "timeseries": "time-series-database", "tsdb": "time-series-database",
+    "vectordb": "vectordb", "rag": "rag-system", "llmserving": "inference-optimization",
+    "flashsale": "ticketmaster", "seckill": "ticketmaster", "onlinejudge": "online-judge-system",
+    "collaborativeeditor": "google-docs", "videoconferencing": "live-streaming-platform",
+    "livecomments": "fb-live-comments", "proximityservice": "yelp", "nearbyfriends": "yelp",
+}
+
+# Chinese terms -> folder id (the coach must accept 中文 topic names).
+ZH_ALIASES: dict[str, str] = {
+    "短链": "url-shortener", "短链接": "url-shortener", "短网址": "url-shortener",
+    "发号器": "unique-id-generator", "唯一id": "unique-id-generator", "分布式id": "unique-id-generator",
+    "限流": "rate-limiter", "限流器": "rate-limiter", "令牌桶": "rate-limiter",
+    "秒杀": "ticketmaster", "抢票": "ticketmaster", "票务": "ticketmaster",
+    "信息流": "newsfeed", "朋友圈": "newsfeed", "新闻推荐": "news-feed-aggregator",
+    "聊天": "messaging-system", "即时通讯": "messaging-system", "群聊": "messaging-system",
+    "网盘": "file-storage-service", "文件同步": "file-storage-service", "云盘": "file-storage-service",
+    "对象存储": "object-storage", "键值存储": "key-value-store", "缓存": "distributed-cache",
+    "分布式缓存": "distributed-cache", "消息队列": "distributed-message-queue",
+    "发布订阅": "pubsub", "定时任务": "distributed-job-scheduler", "任务调度": "distributed-job-scheduler",
+    "分布式锁": "distributed-locking", "爬虫": "web-crawler-system", "搜索": "distributed-search",
+    "自动补全": "typeahead", "搜索提示": "typeahead", "监控": "monitoring-system",
+    "日志": "distributed-logging", "可观测性": "observability", "链路追踪": "observability",
+    "网约车": "uber", "打车": "uber", "外卖": "food-delivery", "配送": "food-delivery",
+    "直播": "live-streaming-platform", "弹幕": "fb-live-comments", "点赞评论": "fb-live-comments",
+    "视频": "video-streaming", "短视频": "tiktok", "推荐系统": "recommendation",
+    "广告点击": "ad-click-aggregator", "支付": "payment", "订单": "e-commerce",
+    "电商": "e-commerce", "库存": "ticketmaster", "通知": "notification-system",
+    "推送": "notification-system", "排行榜": "dream11-leaderboard", "热门话题": "trending-topic-system",
+    "协同文档": "google-docs", "在线文档": "google-docs", "地图": "google-maps",
+    "附近的人": "yelp", "酒店预订": "hotel-booking-system", "会议室预订": "conference-room-booking",
+    "时序数据库": "time-series-database", "数据管道": "data-pipeline", "数仓": "big-data-pipeline",
+    "向量检索": "vectordb", "大模型推理": "inference-optimization", "训练平台": "distributed-genai-training",
+    "灾备": "disaster-recovery-system", "容灾": "disaster-recovery-system",
+    "负载均衡": "load-balancer", "网关": "api-gateway",
+    "会话管理": "session-management-system", "权限": "rbac", "秒级估算": "back-of-envelope",
+    "一致性": "consistency-models-guide", "容量估算": "back-of-envelope",
+}
+
+
+def build_resolver(cat: dict) -> dict:
+    """Group duplicate folders and resolve aliases. Pure function of the scan result."""
+    askable = [t for t in cat["topics"] if t["category"] != "scaffold"]
+    topics = {t["id"]: t for t in askable}   # aliases may only target askable topics
+    groups: dict[str, list[dict]] = {}
+    for t in askable:
+        groups.setdefault(norm_key(t["id"]), []).append(t)
+    resolved, group_rows = {}, []
+    for key, members in sorted(groups.items()):
+        members.sort(key=lambda t: (-doc_score(t), noise_penalty(t["id"]), -t["files"],
+                                    len(t["id"]), t["id"]))
+        canon = members[0]
+        variants = [m["id"] for m in members[1:]]
+        group_rows.append({
+            "key": key, "canonical": canon["id"], "title": canon["title"],
+            "category": canon["category"], "docs": doc_score(canon),
+            "md_files": canon["md_files"],
+            "quiz": canon["docs"]["quiz"], "drills": canon["docs"]["drills"],
+            "variants": variants,
+            # Thin means "little to read", not "missing the standard filenames": several topics use
+            # their own numbering (airtag has 01-clarify-problem.md, 03-nfr-slos.md ...) and are
+            # richly documented. Only call a topic thin when both signals are low.
+            "thin": doc_score(canon) < 4 and canon["md_files"] < 6,
+        })
+        for m in members:
+            resolved[m["id"]] = canon["id"]
+    # aliases (curated + Chinese); keep only those whose target exists
+    aliases, dangling = {}, []
+    for src, target in list(CURATED_ALIASES.items()) + list(ZH_ALIASES.items()):
+        if target in topics:
+            aliases[src] = resolved.get(target, target)
+        else:
+            dangling.append((src, target))
+    return {"groups": group_rows, "folder_to_canonical": resolved,
+            "aliases": aliases, "dangling_aliases": sorted(dangling)}
+
+
+def render_resolver_md(cat: dict, res: dict) -> str:
+    groups, aliases = res["groups"], res["aliases"]
+    dupes = [g for g in groups if g["variants"]]
+    thin = [g for g in groups if g["thin"]]
+    zh = {k: v for k, v in aliases.items() if any("一" <= c <= "鿿" for c in k)}
+    en = {k: v for k, v in aliases.items() if k not in zh}
+    out = [
+        "# 系统设计主题解析器（resolver）——候选人说什么都能接上",
+        "",
+        "> **自动生成，请勿手改** —— 由 `scripts/build_system_design_catalog.py` 生成，"
+        "`scripts/verify_system_design.py` 校验。配套目录见 "
+        "[system-design-catalog.md](system-design-catalog.md)。",
+        ">",
+        f"> 语料是长年累积的，同一个主题最多有 **{max((len(g['variants']) + 1) for g in groups)}** 种拼法，"
+        f"还有几个目录本身是错别字。本文件把 **{len(res['folder_to_canonical'])}** 个可出题目录折叠成 "
+        f"**{len(groups)}** 个主题，并给出 **{len(aliases)}** 条别名（含 {len(zh)} 条中文）。",
+        "",
+        "## 智能体解析顺序（照这个顺序做，不要跳步）",
+        "",
+        "1. **别名表**：把候选人的说法（去掉「设计 / design / 一个 / a」等词、忽略大小写与连字符）"
+        "在下面两张别名表里查——命中即得到规范主题目录。",
+        "2. **目录名精确匹配**：再到 [catalog](system-design-catalog.md) 里按目录名查；命中后用"
+        "「重复主题」表把它折叠到规范目录（变体目录里的 `06-quiz.md` 也值得读，常有不同的追问）。",
+        "3. **关键词模糊匹配**：用标题与一句话摘要在 catalog 里搜关键词（英文 + 中文都试）。",
+        "4. **都没命中**：**照样开面**——用 `system-design-questions.md` 的 Q1–Q4 方法论驱动"
+        "（需求澄清 → 估算 → 高层设计 → 深挖 → 权衡与可运维性），并**明确告诉候选人语料里没有这个主题**，"
+        "不要假装在读某份文档。",
+        "5. **AWS 岗位**：若候选人面的是 AWS / 云岗，再叠加 "
+        "[collections/aws-managed-services-only.md](../../collections/aws-managed-services-only.md)"
+        "（195 题，其中 131–195 是 11 个经典题的 AWS-only 渲染）作为「同一道题只用托管服务怎么答」的追问层。",
+        "",
+        "## 一、别名 → 规范主题（英文 / 品牌 / 口语说法）",
+        "",
+        "| 候选人可能说 | 规范主题目录 |",
+        "|---|---|",
+    ]
+    for k in sorted(en):
+        out.append(f"| `{k}` | [`{en[k]}`](../../system-design/{en[k]}/) |")
+    out += ["", "## 二、别名 → 规范主题（中文）", "",
+            "> 中文候选人直接说中文题名；这张表让 `switch system-design 秒杀` 能用。", "",
+            "| 中文说法 | 规范主题目录 |", "|---|---|"]
+    for k in sorted(zh):
+        out.append(f"| {k} | [`{zh[k]}`](../../system-design/{zh[k]}/) |")
+    out += ["", f"## 三、重复主题：{len(dupes)} 组（同一题的多种拼法）", "",
+            "> 规范目录是文档最全的那个；变体目录**不要当成新题**，但可以借它们的 `06-quiz.md` 做追问。", "",
+            "| 规范主题 | 文档数 | 变体目录（同一题） |", "|---|---|---|"]
+    for g in sorted(dupes, key=lambda g: (-len(g["variants"]), g["canonical"])):
+        vs = " · ".join(f"`{v}`" for v in g["variants"])
+        out.append(f"| [`{g['canonical']}`](../../system-design/{g['canonical']}/) | {g['docs']}/11 | {vs} |")
+    alt = [g for g in groups if g["docs"] < 4 and g["md_files"] >= 6]
+    out += ["", f"## 四、文档偏薄的主题：{len(thin)} 个（标准文档 <4 份**且** md 总数 <6）", "",
+            "> 这些主题**仍然可以面**，但不要假装有完整语料：先 `ls` 该目录读实际存在的 md，"
+            "再用 Q1–Q4 方法论补齐流程，并按需从同类主题（同一分类下文档齐全的那个）借追问。", "",
+            "| 主题 | 分类 | 标准文档 | md 总数 | 有 quiz | 有 drills |", "|---|---|---|---|---|---|"]
+    for g in sorted(thin, key=lambda g: (g["docs"], g["md_files"], g["canonical"])):
+        out.append(f"| [`{g['canonical']}`](../../system-design/{g['canonical']}/) | {g['category']} | "
+                   f"{g['docs']}/11 | {g['md_files']} | {'✓' if g['quiz'] else '·'} | "
+                   f"{'✓' if g['drills'] else '·'} |")
+    out += ["", f"### 四之二、用了**非标准编号**的主题：{len(alt)} 个（别误判成薄）", "",
+            "> 这些目录缺少 `00-index.md` / `06-quiz.md` 这类标准名，但自带另一套编号"
+            "（例如 `airtag/` 有 `01-clarify-problem.md`、`03-nfr-slos.md`、`13-security-privacy.md`）。"
+            "**先 `ls` 目录，再决定读什么**；不要对候选人说「语料很薄」。", "",
+            "| 主题 | 分类 | 标准文档 | md 总数 |", "|---|---|---|---|"]
+    for g in sorted(alt, key=lambda g: (-g["md_files"], g["canonical"])):
+        out.append(f"| [`{g['canonical']}`](../../system-design/{g['canonical']}/) | {g['category']} | "
+                   f"{g['docs']}/11 | {g['md_files']} |")
+    out.append("")
+    return "\n".join(out) + "\n"
+
+
+# Words to drop from a spoken topic request before matching ("design a URL shortener, please").
+REQUEST_STOPWORDS = {
+    "design", "designing", "designs", "a", "an", "the", "please", "system", "service",
+    "interview", "question", "for", "me", "how", "would", "you", "build", "lets", "let",
+    "设计", "一个", "一下", "系统", "服务", "题", "面试", "请", "帮我", "我想", "来",
+}
+
+
+def phrase_probes(phrase: str) -> tuple[str, list[str]]:
+    """Normalised key and the whole-phrase probes used for alias lookup, in order."""
+    raw = phrase.strip().lower()
+    toks = [t for t in re.split(r"[^0-9a-z\u4e00-\u9fff]+", raw) if t and t not in REQUEST_STOPWORDS]
+    key = norm_key("-".join(toks))
+    return raw, [key, "".join(toks), raw]
+
+
+def alias_redirect(res: dict, phrase: str) -> str | None:
+    """The canonical topic a curated whole-phrase alias redirects to, if any."""
+    canon = {g["canonical"] for g in res["groups"]}
+    for probe in phrase_probes(phrase)[1]:
+        tgt = res["aliases"].get(probe)
+        if tgt in canon:
+            return tgt
+    return None
+
+
+def resolve_phrase(res: dict, phrase: str) -> list[dict]:
+    """Resolve what a candidate said to canonical topics.
+
+    Precedence, most specific first — an exact folder name always beats an alias, otherwise a
+    folder like `conference-room-booking` gets hijacked by the `booking` alias.
+    """
+    groups = {g["canonical"]: g for g in res["groups"]}
+    folders = res["folder_to_canonical"]
+    norm_index = {norm_key(f): c for f, c in folders.items()}
+    raw = phrase.strip().lower()
+    toks = [t for t in re.split(r"[^0-9a-z\u4e00-\u9fff]+", raw) if t and t not in REQUEST_STOPWORDS]
+    key = norm_key("-".join(toks))
+    joined = "".join(toks)
+
+    def hit(how: str, canon: str) -> list[dict]:
+        return [{"how": how, **groups[canon]}] if canon in groups else []
+
+    # 1. whole-phrase curated alias — a deliberate redirect to the best-documented topic for
+    #    this concept ("bitly" -> url-shortener), so it outranks a same-named thin folder
+    redirect = alias_redirect(res, phrase)
+    if redirect:
+        return hit(f"alias:{redirect}", redirect)
+    # 2. exact folder name (raw, then the obvious re-spellings), folded to canonical
+    for probe in [raw, "-".join(toks), "_".join(toks), joined]:
+        if probe in folders:
+            h = hit(f"folder:{probe}", folders[probe])
+            if h:
+                return h
+    # 3. normalised folder name — catches "dns network services", "url shortener"
+    if key in norm_index:
+        h = hit(f"folder~{key}", norm_index[key])
+        if h:
+            return h
+    # 4. Chinese has no word separators, so "设计一个秒杀系统" arrives as one token: match the
+    #    longest CJK alias that appears as a substring ("短链接" before "短链")
+    for k in sorted((k for k in res["aliases"]
+                     if any("\u4e00" <= c <= "\u9fff" for c in k) and k in raw),
+                    key=len, reverse=True):
+        h = hit(f"alias:{k}", res["aliases"][k])
+        if h:
+            return h
+    # 5. a single token of the phrase is an alias ("build me a cdn thing") — deliberately after
+    #    the folder steps, so `conference-room-booking` is not hijacked by the `booking` alias
+    for tok in toks:
+        if tok in res["aliases"]:
+            h = hit(f"alias:{tok}", res["aliases"][tok])
+            if h:
+                return h
+    # 6. keyword match on canonical id / title
+    hits = [{"how": "keyword", **g} for g in res["groups"]
+            if toks and all(tok in f"{g['canonical']} {g['title']}".lower() for tok in toks)]
+    return hits[:8]
+
+
+def cmd_resolve(phrase: str) -> int:
+    if not OUT_RES_JSON.is_file():
+        sys.exit("resolver.json missing — run this script with no arguments first")
+    res = json.loads(OUT_RES_JSON.read_text(encoding="utf-8"))
+    hits = resolve_phrase(res, phrase)
+    if not hits:
+        print(f"no corpus topic for {phrase!r}\n"
+              "  -> run the interview from the Q1-Q4 methodology in "
+              "modules/system-design/system-design-questions.md, and say the corpus has no doc for it")
+        return 0
+    for h in hits:
+        thin = "  [THIN: read what exists, borrow probes from a sibling]" if h["thin"] else ""
+        print(f"{h['canonical']}  ({h['how']}, {h['docs']}/11 docs, "
+              f"quiz={'y' if h['quiz'] else 'n'} drills={'y' if h['drills'] else 'n'}){thin}")
+        print(f"  path : system-design/{h['canonical']}/")
+        print(f"  title: {h['title']}")
+        if h["variants"]:
+            print(f"  same question, extra probes in: {' '.join(h['variants'])}")
+    return 0
+
+
 def main() -> int:
+    if "--resolve" in sys.argv:
+        i = sys.argv.index("--resolve")
+        phrase = " ".join(sys.argv[i + 1:]).strip()
+        if not phrase:
+            sys.exit("usage: build_system_design_catalog.py --resolve <what the candidate said>")
+        return cmd_resolve(phrase)
     check = "--check" in sys.argv
     cat = build()
     md = render_md(cat)
     js = json.dumps(cat, ensure_ascii=False, indent=1) + "\n"
+    res = build_resolver(cat)
+    res_md = render_resolver_md(cat, res)
+    res_js = json.dumps(res, ensure_ascii=False, indent=1) + "\n"
+    if res["dangling_aliases"]:
+        print("alias targets missing from the corpus (fix CURATED_ALIASES / ZH_ALIASES):", file=sys.stderr)
+        for src, tgt in res["dangling_aliases"]:
+            print(f"  {src} -> {tgt}", file=sys.stderr)
+        return 1
     if check:
-        ok = OUT_MD.is_file() and OUT_JSON.is_file() and OUT_MD.read_text() == md and OUT_JSON.read_text() == js
-        print("catalog up to date" if ok else "catalog is STALE — rerun scripts/build_system_design_catalog.py")
-        return 0 if ok else 1
+        files = [(OUT_MD, md), (OUT_JSON, js), (OUT_RES_MD, res_md), (OUT_RES_JSON, res_js)]
+        stale = [f.name for f, want in files if not f.is_file() or f.read_text() != want]
+        print("catalog + resolver up to date" if not stale
+              else f"STALE ({', '.join(stale)}) — rerun scripts/build_system_design_catalog.py")
+        return 0 if not stale else 1
     OUT_MD.parent.mkdir(parents=True, exist_ok=True)
     OUT_MD.write_text(md, encoding="utf-8")
     OUT_JSON.write_text(js, encoding="utf-8")
+    OUT_RES_MD.write_text(res_md, encoding="utf-8")
+    OUT_RES_JSON.write_text(res_js, encoding="utf-8")
     n = len(cat["topics"])
     by = {}
     for t in cat["topics"]:
         by[t["category"]] = by.get(t["category"], 0) + 1
     print(f"wrote {OUT_MD.relative_to(ROOT)} and {OUT_JSON.relative_to(ROOT)}: {n} topics, "
           f"{len(cat['docs_hubs'])} docs hubs; by category: {by}")
+    print(f"wrote {OUT_RES_MD.relative_to(ROOT)} and {OUT_RES_JSON.relative_to(ROOT)}: "
+          f"{len(res['groups'])} canonical topics folded from {len(res['folder_to_canonical'])} folders, "
+          f"{len(res['aliases'])} aliases, "
+          f"{sum(1 for g in res['groups'] if g['thin'])} thin topics")
     return 0
 
 
